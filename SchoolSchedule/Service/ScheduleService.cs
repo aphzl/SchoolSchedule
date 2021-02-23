@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using SchoolSchedule.Model.Dto;
 using SchoolSchedule.Model.Entity;
 using System;
@@ -11,12 +12,16 @@ namespace SchoolSchedule.Service
     {
         private readonly ScheduleContext dbContext;
 
-        public ScheduleService()
+        public ScheduleService(Action<DbContextOptionsBuilder> buildAction)
         {
             Console.WriteLine("connecting to DB...");
-            dbContext = new ScheduleContext();
+            dbContext = new ScheduleContext(buildAction);
+            //dbContext.Database.EnsureCreated();
             Console.WriteLine("connected");
-            Console.WriteLine(dbContext.Database.GetDbConnection().ConnectionString);
+            Console.WriteLine("migrating...");
+            dbContext.Database.Migrate();
+            Console.WriteLine("migrated");
+            //Console.WriteLine(dbContext.Database.GetDbConnection().ConnectionString);
         }
 
         public T SaveEntityAndUpdate<T>(T entity)
@@ -44,7 +49,7 @@ namespace SchoolSchedule.Service
             => GetWeekSchedule<Student>(
                 s => s.FirstName == firstName && s.MidName == midName && s.LastName == lastName);
 
-        public WeekSchedule GetClassWeekSchedule(string classNumber, string classLetter)
+        public WeekSchedule GetClassWeekSchedule(int classNumber, string classLetter)
             => GetWeekSchedule<SchoolClass>(
                 c => c.ClassNumber == classNumber && c.Letter == classLetter);
 
@@ -61,7 +66,10 @@ namespace SchoolSchedule.Service
         {
             var entity = dbContext.Set<T>()
                            .Where(entityPredicate)
-                           .FirstOrDefault(null);
+                           .FirstOrDefault();
+
+            if (entity == null) return null;
+
             dbContext.Entry(entity).State = EntityState.Detached;
 
             return entity;
@@ -83,7 +91,7 @@ namespace SchoolSchedule.Service
             return ToWeekSchedule(entity.Exercises);
         }
 
-        private WeekSchedule ToWeekSchedule(List<Exercise> exercises)
+        private WeekSchedule ToWeekSchedule(IList<Exercise> exercises)
             => new WeekSchedule
             {
                 ScheduleByDay = exercises

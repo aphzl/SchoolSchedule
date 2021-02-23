@@ -19,7 +19,7 @@ namespace SchoolSchedule.Model.Entity
         [Column("last_name")]
         public string LastName { get; set; }
 
-        public  List<Lesson> Lessons { get; set; }
-        public virtual List<Exercise> Exercises { get; set; }
+        public virtual IList<Lesson> Lessons { get; set; }
+        public virtual IList<Exercise> Exercises { get; set; }
     }
 }

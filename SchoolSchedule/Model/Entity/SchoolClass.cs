@@ -14,9 +14,9 @@ namespace SchoolSchedule.Model.Entity
         public string Letter { get; set; }
 
         [Column("class_number")]
-        public string ClassNumber { get; set; }
+        public int ClassNumber { get; set; }
 
-        public virtual List<Student> Students { get; set; }
-        public virtual List<Exercise> Exercises { get; set; }
+        public virtual IList<Student> Students { get; set; }
+        public virtual IList<Exercise> Exercises { get; set; }
     }
 }

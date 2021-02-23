@@ -12,9 +12,8 @@ namespace SchoolSchedule.Model.Entity
 
         [Column("name")]
         public string Name { get; set; }
-
-        [NotMapped]
-        public virtual List<Teacher> Teachers { get; set; }
-        public virtual List<Exercise> Exercises { get; set; }
+        
+        public virtual IList<Teacher> Teachers { get; set; }
+        public virtual IList<Exercise> Exercises { get; set; }
     }
 }

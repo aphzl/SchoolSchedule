@@ -1,4 +1,6 @@
-﻿using SchoolSchedule.Service;
+﻿using Microsoft.EntityFrameworkCore;
+using SchoolSchedule.Model.Entity;
+using SchoolSchedule.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +34,8 @@ namespace SchoolScheduleApp
 
         public ScheduleConsole()
         {
-            scheduleService = new ScheduleService();
+            scheduleService = new ScheduleService(
+                b => b.UseNpgsql("host=localhost;database=sched6;username=schedule;password=schedule;"));
 
             saveMap = new Dictionary<string, Action<List<string>>>()
             {
@@ -99,14 +102,14 @@ namespace SchoolScheduleApp
             var classNumber = RequestInput("Введите номер");
             var letter = RequestInput("Введите букву");
 
-            var schoolClass = new SchoolClass()
+            var schoolClass = new SchoolClass
             {
                 Id = id,
                 Letter = letter,
-                ClassNumber = classNumber
+                ClassNumber = int.Parse(classNumber)
             };
 
-            scheduleService.SaveSchoolClass(schoolClass);
+            scheduleService.SaveEntityAndUpdate(schoolClass);
         }
 
         private string RequestInput(string requestText)

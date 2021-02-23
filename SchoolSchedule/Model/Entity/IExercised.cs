@@ -6,6 +6,6 @@ namespace SchoolSchedule.Model.Entity
 {
     interface IExercised
     {
-        List<Exercise> Exercises { get; }
+        IList<Exercise> Exercises { get; }
     }
 }

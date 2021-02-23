@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SchoolSchedule.Model;
+using SchoolSchedule.Model.Entity;
 
 namespace SchoolSchedule.Service
 {

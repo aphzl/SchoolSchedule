@@ -14,7 +14,7 @@ CREATE TABLE lesson (
 
 CREATE TABLE school_class (
 	id varchar NOT NULL,
-	class_number varchar NOT NULL,
+	class_number numeric NOT NULL,
 	letter varchar NOT NULL
 );
 
@@ -30,8 +30,7 @@ CREATE TABLE teacher (
 	id varchar NOT NULL,
 	first_name varchar NOT NULL,
 	mid_name varchar NOT NULL,
-	last_name varchar NOT NULL,
-
+	last_name varchar NOT NULL
 );
 
 CREATE TABLE teacher_lesson (
