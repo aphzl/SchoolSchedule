@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SchoolSchedule.Model.Entity
 {
     [Table(tableName)]
-    public class Exercise : ScheduleObject
+    public class Exercise : ScheduleObject, ICloneable
     {
         private const string tableName = "excercise";
 
@@ -26,5 +27,19 @@ namespace SchoolSchedule.Model.Entity
 
         [Column("auditory")]
         public int Auditory { get; set; }
+
+        public object Clone()
+        {
+            return new Exercise()
+            {
+                Id = Id,
+                Lesson = Lesson,
+                Teacher = Teacher,
+                DayOfWeek = DayOfWeek,
+                ExerciseNumber = ExerciseNumber,
+                SchoolClass = SchoolClass,
+                Auditory = Auditory
+            };
+        }
     }
 }

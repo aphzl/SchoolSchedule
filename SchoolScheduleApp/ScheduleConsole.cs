@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace SchoolScheduleApp
 {
-    class ScheduleConsole
+    internal class ScheduleConsole
     {
         private bool isWorking;
 
@@ -21,21 +21,19 @@ namespace SchoolScheduleApp
         private static readonly Dictionary<string, Action<List<string>>> getMap =
             new Dictionary<string, Action<List<string>>>()
             {
-
             };
 
         private static readonly Dictionary<string, Action<List<string>>> removeMap =
             new Dictionary<string, Action<List<string>>>()
             {
-
             };
 
         private readonly Dictionary<string, Dictionary<string, Action<List<string>>>> keysMap;
 
         public ScheduleConsole()
         {
-            scheduleService = new ScheduleService(
-                b => b.UseNpgsql("host=localhost;database=sched6;username=schedule;password=schedule;"));
+            scheduleService = ScheduleService.Create(
+                b => b.UseNpgsql("host=localhost;database=sched4;username=schedule;password=schedule;"));
 
             saveMap = new Dictionary<string, Action<List<string>>>()
             {
@@ -51,6 +49,7 @@ namespace SchoolScheduleApp
                 ["exit"] = new Dictionary<string, Action<List<string>>>() { ["do"] = args => isWorking = false }
             };
         }
+
         public void StartConsoleCycle()
         {
             isWorking = true;
@@ -58,7 +57,7 @@ namespace SchoolScheduleApp
             while (isWorking)
             {
                 Console.Write("Введите команду: ");
-                var input = Console. ReadLine();
+                var input = Console.ReadLine();
                 var parts = input.Split(' ')
                     .Where(p => p.Any())
                     .ToList();
@@ -109,7 +108,7 @@ namespace SchoolScheduleApp
                 ClassNumber = int.Parse(classNumber)
             };
 
-            scheduleService.SaveEntityAndUpdate(schoolClass);
+            scheduleService.Save(schoolClass);
         }
 
         private string RequestInput(string requestText)

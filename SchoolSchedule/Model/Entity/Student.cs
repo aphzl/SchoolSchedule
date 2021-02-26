@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SchoolSchedule.Model.Entity
 {
     [Table(tableName)]
-    public class Student : ScheduleObject, IExercised
+    public class Student : ScheduleObject, IExercised, ICloneable
     {
         private const string tableName = "student";
 
@@ -19,9 +20,22 @@ namespace SchoolSchedule.Model.Entity
         [Column("last_name")]
         public string LastName { get; set; }
 
-        [Column("school_class_id")]
+        [ForeignKey("school_class_id")]
         public SchoolClass SchoolClass { get; set; }
 
         public virtual IList<Exercise> Exercises { get; set; }
+
+        public object Clone()
+        {
+            return new Student
+            {
+                Id = Id,
+                FirstName = FirstName,
+                MidName = MidName,
+                LastName = LastName,
+                SchoolClass = SchoolClass,
+                Exercises = Exercises
+            };
+        }
     }
 }

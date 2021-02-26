@@ -1,5 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using SchoolSchedule.Exceptions;
 using SchoolSchedule.Model.Dto;
 using SchoolSchedule.Model.Entity;
 using System;
@@ -12,37 +12,58 @@ namespace SchoolSchedule.Service
     {
         private readonly ScheduleContext dbContext;
 
-        public ScheduleService(Action<DbContextOptionsBuilder> buildAction)
+        private ScheduleService(ScheduleContext context)
+        {
+            dbContext = context;
+        }
+
+        public static ScheduleService Create(Action<DbContextOptionsBuilder> buildAction)
         {
             Console.WriteLine("connecting to DB...");
-            dbContext = new ScheduleContext(buildAction);
-            //dbContext.Database.EnsureCreated();
+            ScheduleContext dbContext = new ScheduleContext(buildAction);
             Console.WriteLine("connected");
             Console.WriteLine("migrating...");
-            dbContext.Database.Migrate();
+            new Migrator(dbContext).Migrate();
             Console.WriteLine("migrated");
-            //Console.WriteLine(dbContext.Database.GetDbConnection().ConnectionString);
+
+            return new ScheduleService(dbContext);
         }
 
-        public T SaveEntityAndUpdate<T>(T entity)
-            where T : ScheduleObject
+        public Student Save(Student student)
         {
-            T existing = dbContext.Find<T>(entity.Id);
+            var savingEntity = student.Clone() as Student;
 
-            if (existing == null)
-            {
-                existing = dbContext.Add(entity).Entity;
-            }
-            else
-            {
-                existing = dbContext.Update(entity).Entity;
-            }
+            HandleForeignKey(() => savingEntity.SchoolClass, c => savingEntity.SchoolClass = c);
 
-            dbContext.SaveChanges();
-
-            return existing;
+            return SaveEntityAndUpdate(savingEntity);
         }
 
+        public SchoolClass Save(SchoolClass schoolClass) => SaveEntityAndUpdate(schoolClass);
+
+        public Lesson Save(Lesson lesson) => SaveEntityAndUpdate(lesson);
+
+        public Teacher Save(Teacher teacher) => SaveEntityAndUpdate(teacher);
+
+        public TeacherLesson Save(TeacherLesson teacherLesson)
+        {
+            var savingEntity = teacherLesson.Clone() as TeacherLesson;
+
+            HandleForeignKey(() => savingEntity.Teacher, t => savingEntity.Teacher = t);
+            HandleForeignKey(() => savingEntity.Lesson, l => savingEntity.Lesson = l);
+
+            return SaveEntityAndUpdate(teacherLesson);
+        }
+
+        public Exercise Save(Exercise exercise)
+        {
+            var savingEntity = exercise.Clone() as Exercise;
+
+            HandleForeignKey(() => savingEntity.Lesson, l => savingEntity.Lesson = l);
+            HandleForeignKey(() => savingEntity.Teacher, t => savingEntity.Teacher = t);
+
+            return SaveEntityAndUpdate(savingEntity);
+        }
+        
         public WeekSchedule GetFullWeekSchedule() => ToWeekSchedule(dbContext.Exercises.ToList());
 
         public WeekSchedule GetStudentWeekSchedule(string firstName, string midName, string lastName)
@@ -81,6 +102,35 @@ namespace SchoolSchedule.Service
             dbContext.SaveChanges();
         }
 
+        private void HandleForeignKey<T>(Func<T> getForeign, Action<T> setForeign)
+            where T : class, IKeyable
+        {
+            if (getForeign() != null)
+            {
+                var foreign = dbContext.Find<T>(getForeign().Key);
+                if (foreign == null) ThrowForeignKeyException(getForeign().Key);
+                else setForeign(foreign);
+            }
+        }
+
+        private T SaveEntityAndUpdate<T>(T entity) where T : class, IKeyable
+        {
+            T existing = dbContext.Find<T>(entity.Key);
+
+            if (existing == null)
+            {
+                existing = dbContext.Add(entity).Entity;
+            }
+            else
+            {
+                existing = dbContext.Update(entity).Entity;
+            }
+
+            dbContext.SaveChanges();
+
+            return existing;
+        }
+
         private WeekSchedule GetWeekSchedule<T>(Func<T, bool> entityPredicate)
             where T : ScheduleObject, IExercised
         {
@@ -105,5 +155,7 @@ namespace SchoolSchedule.Service
                             }
                         )
             };
+
+        private void ThrowForeignKeyException(object[] key) => throw new ForeignKeyScheduleException($"Entity witn key={key} not exist");
     }
 }

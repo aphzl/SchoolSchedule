@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SchoolScheduleTests
 {
-    public class SqliteInMemoryItemsControllerTest : ItemsControllerTest, IDisposable
+    /*public class SqliteInMemoryItemsControllerTest : ItemsControllerTest, IDisposable
     {
         private readonly DbConnection _connection;
 
@@ -27,5 +27,5 @@ namespace SchoolScheduleTests
         }
 
         public void Dispose() => _connection.Dispose();
-    }
+    }*/
 }

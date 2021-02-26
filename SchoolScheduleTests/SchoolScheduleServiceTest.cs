@@ -12,27 +12,34 @@ namespace SchoolScheduleTests
     {
         private ScheduleService service;
 
+        private static readonly SchoolClass sClass = new SchoolClass
+        {
+            Id = Guid.NewGuid().ToString(),
+            ClassNumber = 2,
+            Letter = "v"
+        };
+
+        private static readonly Student student = new Student
+        {
+            Id = Guid.NewGuid().ToString(),
+            FirstName = "sdjlj",
+            MidName = "אגûהאמזפ",
+            LastName = "ajfdsa",
+            SchoolClass = sClass
+        };
+
         [TestInitialize()]
         public void Startup()
         {
             var connection = new SqliteConnection("Filename=:memory:");
             connection.Open();
-            service = new ScheduleService(b => b.UseSqlite(connection));
-            //service = new ScheduleService(b => b.UseNpgsql("host=localhost;database=sched6;username=schedule;password=schedule;"));
+            service = ScheduleService.Create(b => b.UseSqlite(connection));
         }
-
 
         [TestMethod]
         public void ShouldSaveAndReadEntities()
         {
-            var sClass = new SchoolClass
-            {
-                Id = Guid.NewGuid().ToString(),
-                ClassNumber = 2,
-                Letter = "v"
-            };
-
-            service.SaveEntityAndUpdate(sClass);
+            service.Save(sClass);
 
             var savedClass = service.FindScheduleEntity((SchoolClass c) => c.Id == sClass.Id);
 
@@ -41,16 +48,7 @@ namespace SchoolScheduleTests
             Assert.IsTrue(savedClass.ClassNumber == sClass.ClassNumber);
             Assert.IsTrue(savedClass.Letter == sClass.Letter);
 
-            var student = new Student
-            {
-                Id = Guid.NewGuid().ToString(),
-                FirstName = "sdjlj",
-                MidName = "אגûהאמזפ",
-                LastName = "ajfdsa",
-                SchoolClass = sClass
-            };
-
-            service.SaveEntityAndUpdate(student);
+            service.Save(student);
 
             var savedStudent = service.FindScheduleEntity((Student s) => s.Id == student.Id);
 
@@ -59,7 +57,7 @@ namespace SchoolScheduleTests
             Assert.IsTrue(student.FirstName == savedStudent.FirstName);
             Assert.IsTrue(student.MidName == savedStudent.MidName);
             Assert.IsTrue(student.LastName == savedStudent.LastName);
-            Assert.IsTrue(student.SchoolClass.Id == savedStudent.Id);
+            Assert.IsTrue(student.SchoolClass.Id == savedStudent.SchoolClass.Id);
         }
     }
 }
