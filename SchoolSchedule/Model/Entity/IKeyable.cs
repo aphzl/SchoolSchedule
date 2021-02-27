@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SchoolSchedule.Model.Entity
 {
-    interface IKeyable
+    public interface IKeyable
     {
         object[] Key { get; }
     }

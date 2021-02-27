@@ -86,8 +86,7 @@ namespace SchoolSchedule.Service
         public T FindScheduleEntity<T>(Func<T, bool> entityPredicate) where T : ScheduleObject
         {
             var entity = dbContext.Set<T>()
-                           .Where(entityPredicate)
-                           .FirstOrDefault();
+                .FirstOrDefault(entityPredicate);
 
             if (entity == null) return null;
 
@@ -96,9 +95,13 @@ namespace SchoolSchedule.Service
             return entity;
         }
 
-        public void Delete<T>(T entity) where T : ScheduleObject
+        public void Delete<T>(T entity) where T : class, IKeyable
         {
-            dbContext.Remove(entity);
+            var existing = dbContext.Find<T>(entity.Key);
+
+            if (existing == null) return;
+
+            dbContext.Remove(existing);
             dbContext.SaveChanges();
         }
 
@@ -115,7 +118,7 @@ namespace SchoolSchedule.Service
 
         private T SaveEntityAndUpdate<T>(T entity) where T : class, IKeyable
         {
-            T existing = dbContext.Find<T>(entity.Key);
+            T existing = dbContext.Find<T>(entity.Key);            
 
             if (existing == null)
             {
@@ -123,10 +126,12 @@ namespace SchoolSchedule.Service
             }
             else
             {
+                dbContext.Entry(existing).State = EntityState.Detached;
                 existing = dbContext.Update(entity).Entity;
             }
 
             dbContext.SaveChanges();
+            dbContext.Entry(existing).State = EntityState.Detached;
 
             return existing;
         }
