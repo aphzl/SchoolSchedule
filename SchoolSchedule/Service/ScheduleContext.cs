@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using SchoolSchedule.Model.Entity;
 using System;
-using System.Collections.Generic;
 
 namespace SchoolSchedule.Service
 {
@@ -33,6 +32,12 @@ namespace SchoolSchedule.Service
             modelBuilder
                 .Entity<TeacherLesson>()
                 .HasKey(tl => new { tl.TeacherId, tl.LessonId });
+
+            modelBuilder
+                .Entity<Exercise>()
+                .HasOne(e => e.TeacherLesson)
+                .WithMany()
+                .HasForeignKey(e => new { e.TeacherId, e.LessonId });
         }
 
         override protected void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
