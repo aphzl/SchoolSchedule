@@ -16,7 +16,10 @@ namespace SchoolSchedule.Model.Entity
         [Column("class_number")]
         public int ClassNumber { get; set; }
 
-        public virtual IList<Student> Students { get; set; }
-        public virtual IList<Exercise> Exercises { get; set; }
+        [InverseProperty("SchoolClass")]
+        public IList<Student> Students { get; set; }
+
+        [InverseProperty("SchoolClass")]
+        public IList<Exercise> Exercises { get; set; }
     }
 }

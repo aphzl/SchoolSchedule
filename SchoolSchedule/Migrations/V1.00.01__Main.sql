@@ -2,11 +2,13 @@ CREATE TABLE exercise (
 	id varchar NOT NULL PRIMARY KEY,
 	lesson_id varchar,
 	teacher_id varchar,
+	school_class_id varchar,
 	day_of_week numeric,
 	exercise_number numeric,
 	auditory numeric,
 	FOREIGN KEY (lesson_id) REFERENCES lesson(id),
-	FOREIGN KEY (teacher_id) REFERENCES teacher(id)
+	FOREIGN KEY (teacher_id) REFERENCES teacher(id),
+	FOREIGN KEY (school_class_id) REFERENCES school_class(id)
 );
 
 CREATE TABLE lesson (

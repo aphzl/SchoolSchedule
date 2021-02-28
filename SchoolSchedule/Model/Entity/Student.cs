@@ -23,7 +23,8 @@ namespace SchoolSchedule.Model.Entity
         [ForeignKey("school_class_id")]
         public SchoolClass SchoolClass { get; set; }
 
-        public virtual IList<Exercise> Exercises { get; set; }
+        [NotMapped]
+        public IList<Exercise> Exercises { get => SchoolClass?.Exercises; }
 
         public object Clone()
         {
@@ -33,8 +34,7 @@ namespace SchoolSchedule.Model.Entity
                 FirstName = FirstName,
                 MidName = MidName,
                 LastName = LastName,
-                SchoolClass = SchoolClass,
-                Exercises = Exercises
+                SchoolClass = SchoolClass
             };
         }
     }

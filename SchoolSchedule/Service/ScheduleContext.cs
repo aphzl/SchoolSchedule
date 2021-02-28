@@ -1,12 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SchoolSchedule.Model.Entity;
 using System;
+using System.Collections.Generic;
 
 namespace SchoolSchedule.Service
 {
     class ScheduleContext : MigrationContext
     {
         private readonly Action<DbContextOptionsBuilder> buildAction;
+        private static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
         public DbSet<Exercise> Exercises { get; set; }
 
@@ -27,28 +30,14 @@ namespace SchoolSchedule.Service
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<TeacherLesson>()
+            modelBuilder
+                .Entity<TeacherLesson>()
                 .HasKey(tl => new { tl.TeacherId, tl.LessonId });
-
-            /* modelBuilder.Entity<Student>()
-                 .HasOne(s => s.SchoolClass)
-                 .WithMany(c => c.Students);*/
-
-            /*modelBuilder.Entity<Lesson>()
-                .HasMany(l => l.Teachers)
-                .WithMany(t => t.Lessons)
-                .UsingEntity(j => j.ToTable("teacher_lesson"));
-
-            modelBuilder.Entity<Teacher>()
-                .HasMany(t => t.Lessons)
-                .WithMany(l => l.Teachers)
-                .UsingEntity(j => j.ToTable("teacher_lesson"));*/
         }
 
         override protected void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //optionsBuilder.UseLoggerFactory(loggerFactory);
             buildAction(optionsBuilder);
         }
 

@@ -9,17 +9,14 @@ namespace SchoolSchedule.Model.Entity
     {
         [Column("teacher_id")]
         public string TeacherId { get; set; }
+        
+        public Teacher Teacher { get; set; }
 
         [Column("lesson_id")]
         public string LessonId { get; set; }
-
-        [ForeignKey("teacher_id")]
-        public Teacher Teacher { get; set; }
-
-        [ForeignKey("lesson_id")]
         public Lesson Lesson { get; set; }
 
-        public object[] Key { get => new object[] { TeacherId, LessonId }; }
+        public object[] Key { get => new object[] { Teacher.Id, Lesson.Id }; }
 
         public object Clone()
         {

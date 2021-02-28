@@ -6,14 +6,14 @@ namespace SchoolSchedule.Model.Entity
     [Table(tableName)]
     public class Exercise : ScheduleObject, ICloneable
     {
-        private const string tableName = "excercise";
+        private const string tableName = "exercise";
 
         public override string TableName { get => tableName; }
 
-        [Column("lesson")]
+        [ForeignKey("lesson_id")]
         public Lesson Lesson { get; set; }
 
-        [Column("teacher")]
+        [ForeignKey("teacher_id")]
         public Teacher Teacher { get; set; }
 
         [Column("day_of_week")]
@@ -22,7 +22,7 @@ namespace SchoolSchedule.Model.Entity
         [Column("exercise_number")]
         public int ExerciseNumber { get; set; }
 
-        [Column("school_class")]
+        [ForeignKey("school_class_id")]
         public SchoolClass SchoolClass { get; set; }
 
         [Column("auditory")]

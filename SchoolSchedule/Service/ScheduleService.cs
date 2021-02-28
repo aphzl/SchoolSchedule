@@ -51,7 +51,7 @@ namespace SchoolSchedule.Service
             HandleForeignKey(() => savingEntity.Teacher, t => savingEntity.Teacher = t);
             HandleForeignKey(() => savingEntity.Lesson, l => savingEntity.Lesson = l);
 
-            return SaveEntityAndUpdate(teacherLesson);
+            return SaveEntityAndUpdate(savingEntity);
         }
 
         public Exercise Save(Exercise exercise)
@@ -63,10 +63,14 @@ namespace SchoolSchedule.Service
 
             return SaveEntityAndUpdate(savingEntity);
         }
-        
-        public WeekSchedule GetFullWeekSchedule() => ToWeekSchedule(dbContext.Exercises.ToList());
 
-        public WeekSchedule GetStudentWeekSchedule(string firstName, string midName, string lastName)
+        public void AssignLessonToTeacher(Lesson lesson, Teacher teacher)
+            => Save(new TeacherLesson { Teacher = teacher, Lesson = lesson });
+
+        public WeekSchedule GetFullWeekSchedule()
+            => ToWeekSchedule(dbContext.Exercises.ToList());
+
+        /*public WeekSchedule GetStudentWeekSchedule(string firstName, string midName, string lastName)
             => GetWeekSchedule<Student>(
                 s => s.FirstName == firstName && s.MidName == midName && s.LastName == lastName);
 
@@ -76,24 +80,61 @@ namespace SchoolSchedule.Service
 
         public WeekSchedule GetTeacherWeekSchedule(string firstName, string midName, string lastName)
             => GetWeekSchedule<Teacher>(
-                t => t.FirstName == firstName && t.MidName == midName && t.LastName == lastName);
+                t => t.FirstName == firstName && t.MidName == midName && t.LastName == lastName);*/
 
         public List<SchoolClass> GetAllSchollClasses()
         {
             return dbContext.SchoolClasses.ToListAsync().Result;
         }
 
-        public T FindScheduleEntity<T>(Func<T, bool> entityPredicate) where T : ScheduleObject
-        {
-            var entity = dbContext.Set<T>()
-                .FirstOrDefault(entityPredicate);
+        public Exercise Find(Func<Exercise, bool> predicate)
+            => dbContext
+                .Exercises
+                .Include(e => e.Lesson)
+                .Include(e => e.SchoolClass)
+                .Include(e => e.Teacher)
+                .AsNoTracking()
+                .FirstOrDefault(predicate);
 
-            if (entity == null) return null;
+        public Lesson Find(Func<Lesson, bool> predicate)
+            => dbContext
+                .Lessons
+                .Include(l => l.Exercises)
+                .Include(l => l.TeacherLessons)
+                    .ThenInclude(l => l.Teacher)
+                .AsNoTracking()
+                .FirstOrDefault(predicate);
 
-            dbContext.Entry(entity).State = EntityState.Detached;
+        public SchoolClass Find(Func<SchoolClass, bool> predicate)
+            => dbContext
+                .SchoolClasses
+                .Include(c => c.Exercises)
+                .Include(c => c.Students)
+                .AsNoTracking()
+                .FirstOrDefault(predicate);
 
-            return entity;
-        }
+        public Student Find(Func<Student, bool> predicate)
+            => dbContext
+                .Students
+                .Include(s => s.SchoolClass)
+                .AsNoTracking()
+                .FirstOrDefault(predicate);
+
+        public Teacher Find(Func<Teacher, bool> predicate)
+            => dbContext
+                .Teachers
+                .Include(t => t.TeacherLessons)
+                    .ThenInclude(t => t.Lesson)
+                .AsNoTracking()
+                .FirstOrDefault(predicate);
+
+        public TeacherLesson Find(Func<TeacherLesson, bool> predicate)
+            => dbContext
+                .TeacherLessons
+                .Include(t => t.Teacher)
+                .Include(t => t.Lesson)
+                .AsNoTracking()
+                .FirstOrDefault(predicate);
 
         public void Delete<T>(T entity) where T : class, IKeyable
         {
@@ -136,15 +177,15 @@ namespace SchoolSchedule.Service
             return existing;
         }
 
-        private WeekSchedule GetWeekSchedule<T>(Func<T, bool> entityPredicate)
-            where T : ScheduleObject, IExercised
+        /*private WeekSchedule GetWeekSchedule<T>(Func<T, bool> entityPredicate)
+            where T : class, IExercised
         {
-            var entity = FindScheduleEntity(entityPredicate);
+            var entity = Find(entityPredicate);
 
             if (entity == null) return null;
 
             return ToWeekSchedule(entity.Exercises);
-        }
+        }*/
 
         private WeekSchedule ToWeekSchedule(IList<Exercise> exercises)
             => new WeekSchedule

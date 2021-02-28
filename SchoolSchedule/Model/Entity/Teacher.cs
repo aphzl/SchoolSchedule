@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace SchoolSchedule.Model.Entity
 {
@@ -19,7 +20,16 @@ namespace SchoolSchedule.Model.Entity
         [Column("last_name")]
         public string LastName { get; set; }
 
-        public virtual IList<Lesson> Lessons { get; set; }
+        [NotMapped]
+        public IList<Lesson> Lessons
+        {
+            get => TeacherLessons?.Select(t => t.Lesson).ToList() ?? new List<Lesson>();
+        
+        }
+
+        [InverseProperty("Teacher")]
+        public IList<TeacherLesson> TeacherLessons { get; set; }
+
         public virtual IList<Exercise> Exercises { get; set; }
     }
 }

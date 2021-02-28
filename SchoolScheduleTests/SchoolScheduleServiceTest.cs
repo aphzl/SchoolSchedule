@@ -4,6 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SchoolSchedule.Model.Entity;
 using SchoolSchedule.Service;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SchoolScheduleTests
 {
@@ -84,75 +86,149 @@ namespace SchoolScheduleTests
         public void CrudTest()
         {
             service.Save(sClass);
-            var savedClass = service.FindScheduleEntity((SchoolClass c) => c.Id == sClass.Id);
+            var savedClass = service.Find((SchoolClass c) => c.Id == sClass.Id);
             AssertClassesEquals(savedClass, sClass);
             service.Save(sClass1);
-            var savedClass1 = service.FindScheduleEntity((SchoolClass c) => c.Id == sClass1.Id);
+            var savedClass1 = service.Find((SchoolClass c) => c.Id == sClass1.Id);
             AssertClassesEquals(savedClass1, sClass1);
 
             service.Save(student);
-            var savedStudent = service.FindScheduleEntity((Student s) => s.Id == student.Id);
+            var savedStudent = service.Find((Student s) => s.Id == student.Id);
             AssertStudentsEquals(savedStudent, student);
             service.Save(student1);
-            var savedStudent1 = service.FindScheduleEntity((Student s) => s.Id == student1.Id);
+            var savedStudent1 = service.Find((Student s) => s.Id == student1.Id);
             AssertStudentsEquals(savedStudent1, student1);
 
             service.Save(lesson);
-            var savedLesson = service.FindScheduleEntity((Lesson l) => l.Id == lesson.Id);
+            var savedLesson = service.Find((Lesson l) => l.Id == lesson.Id);
             AssertLessonsEquals(savedLesson, lesson);
             service.Save(lesson1);
-            var savedLesson1 = service.FindScheduleEntity((Lesson l) => l.Id == lesson1.Id);
+            var savedLesson1 = service.Find((Lesson l) => l.Id == lesson1.Id);
             AssertLessonsEquals(savedLesson1, lesson1);
 
             service.Save(teacher);
-            var savedTeacher = service.FindScheduleEntity((Teacher t) => t.Id == teacher.Id);
+            var savedTeacher = service.Find((Teacher t) => t.Id == teacher.Id);
             AssertTeachersEquals(savedTeacher, teacher);
             service.Save(teacher1);
-            var savedTeacher1 = service.FindScheduleEntity((Teacher t) => t.Id == teacher1.Id);
+            var savedTeacher1 = service.Find((Teacher t) => t.Id == teacher1.Id);
             AssertTeachersEquals(savedTeacher1, teacher1);
 
             sClass.ClassNumber = 4;
             service.Save(sClass);
-            var savedChangedClass = service.FindScheduleEntity((SchoolClass c) => c.Id == sClass.Id);
+            var savedChangedClass = service.Find((SchoolClass c) => c.Id == sClass.Id);
             AssertClassesEquals(savedChangedClass, sClass);
 
             student.LastName = "fdkjdkdfk";
             student.SchoolClass = sClass1;
             service.Save(student);
-            var savedChangedStudent = service.FindScheduleEntity((Student s) => s.Id == student.Id);
+            var savedChangedStudent = service.Find((Student s) => s.Id == student.Id);
             AssertStudentsEquals(savedChangedStudent, student);
 
             lesson.Name = "kdkdkdmeee";
             service.Save(lesson);
-            var savedChangedLesson = service.FindScheduleEntity((Lesson l) => l.Id == lesson.Id);
+            var savedChangedLesson = service.Find((Lesson l) => l.Id == lesson.Id);
             AssertLessonsEquals(savedChangedLesson, lesson);
 
             teacher.LastName = "Djldfsn";
             service.Save(teacher);
-            var savedChangedTeacher = service.FindScheduleEntity((Teacher t) => t.Id == teacher.Id);
+            var savedChangedTeacher = service.Find((Teacher t) => t.Id == teacher.Id);
             AssertTeachersEquals(savedChangedTeacher, teacher);
 
             service.Delete(student);
-            Assert.IsNull(service.FindScheduleEntity<Student>(s => s.Id == student.Id));
-            Assert.IsNotNull(service.FindScheduleEntity<SchoolClass>(c => c.Id == sClass1.Id));
+            Assert.IsNull(service.Find((Student s) => s.Id == student.Id));
+            Assert.IsNotNull(service.Find((SchoolClass c) => c.Id == sClass1.Id));
             service.Delete(student1);
-            Assert.IsNull(service.FindScheduleEntity<Student>(s => s.Id == student1.Id));
-            Assert.IsNotNull(service.FindScheduleEntity<SchoolClass>(c => c.Id == sClass.Id));
+            Assert.IsNull(service.Find((Student s) => s.Id == student1.Id));
+            Assert.IsNotNull(service.Find((SchoolClass c) => c.Id == sClass.Id));
 
             service.Delete(sClass);
-            Assert.IsNull(service.FindScheduleEntity<SchoolClass>(c => c.Id == sClass.Id));
+            Assert.IsNull(service.Find((SchoolClass c) => c.Id == sClass.Id));
             service.Delete(sClass1);
-            Assert.IsNull(service.FindScheduleEntity<SchoolClass>(c => c.Id == sClass1.Id));
+            Assert.IsNull(service.Find((SchoolClass c) => c.Id == sClass1.Id));
 
             service.Delete(lesson);
-            Assert.IsNull(service.FindScheduleEntity<Lesson>(l => l.Id == lesson.Id));
+            Assert.IsNull(service.Find((Lesson l) => l.Id == lesson.Id));
             service.Delete(lesson1);
-            Assert.IsNull(service.FindScheduleEntity<Lesson>(l => l.Id == lesson1.Id));
+            Assert.IsNull(service.Find((Lesson l) => l.Id == lesson1.Id));
 
             service.Delete(teacher);
-            Assert.IsNull(service.FindScheduleEntity<Teacher>(t => t.Id == teacher.Id));
+            Assert.IsNull(service.Find((Teacher t) => t.Id == teacher.Id));
             service.Delete(teacher1);
-            Assert.IsNull(service.FindScheduleEntity<Teacher>(t => t.Id == teacher1.Id));
+            Assert.IsNull(service.Find((Teacher t) => t.Id == teacher1.Id));
+        }
+
+        [TestMethod]
+        public void TeacherLessonTest()
+        {
+            service.Save(teacher);
+            service.Save(teacher1);
+            service.Save(lesson);
+            service.Save(lesson1);
+
+            service.AssignLessonToTeacher(lesson, teacher);
+            var teacherLesson = service.Find((TeacherLesson tl) => tl.LessonId == lesson.Id && tl.TeacherId == teacher.Id);
+            Assert.IsNotNull(teacherLesson);
+            var teacherWithLesson = service.Find((Teacher t) => t.Id == teacher.Id);
+            var lessonWithTeacher = service.Find((Lesson l) => l.Id == lesson.Id);
+            Assert.IsTrue(teacherWithLesson.Lessons.Count == 1);
+            Assert.IsTrue(lessonWithTeacher.Teachers.Count == 1);
+
+            AssertListsElementsAreEqual(
+                teacherWithLesson.Lessons.ToList(),
+                new List<Lesson> { lesson },
+                l => l.Id,
+                (a, e) => AssertLessonsEquals(a, e));
+            AssertListsElementsAreEqual(
+                lessonWithTeacher.Teachers.ToList(),
+                new List<Teacher> { teacher },
+                t => t.Id,
+                (a, e) => AssertTeachersEquals(a, e));
+
+            service.AssignLessonToTeacher(lesson1, teacher);
+            service.AssignLessonToTeacher(lesson1, teacher1);
+
+            teacherWithLesson = service.Find((Teacher t) => t.Id == teacher.Id);
+            var teacher1WithLesson = service.Find((Teacher t) => t.Id == teacher1.Id);
+            lessonWithTeacher = service.Find((Lesson l) => l.Id == lesson.Id);
+            var lesson1WithTeacher = service.Find((Lesson l) => l.Id == lesson1.Id);
+
+            AssertListsElementsAreEqual(
+                teacherWithLesson.Lessons.ToList(),
+                new List<Lesson> { lesson, lesson1 },
+                l => l.Id,
+                (a, e) => AssertLessonsEquals(a, e));
+            AssertListsElementsAreEqual(
+                teacher1WithLesson.Lessons.ToList(),
+                new List<Lesson> { lesson1 },
+                l => l.Id,
+                (a, e) => AssertLessonsEquals(a, e));
+
+            AssertListsElementsAreEqual(
+                lesson1WithTeacher.Teachers.ToList(),
+                new List<Teacher> { teacher, teacher1 },
+                t => t.Id,
+                (a, e) => AssertTeachersEquals(a, e));
+        }
+
+        private void AssertListsElementsAreEqual<T>(
+            List<T> actualList,
+            List<T> expectedList,
+            Func<T, object> keySelector,
+            Action<T, T> asserter)
+        {
+            var actual = actualList
+                .OrderBy(keySelector)
+                .ToList();
+            var expected = expectedList
+                .OrderBy(keySelector)
+                .ToList();
+
+            Assert.AreEqual(actual.Count, expected.Count);
+
+            for (int i = 0; i < actual.Count; i++)
+            {
+                asserter(actual[i], expected[i]);
+            }
         }
 
         private void AssertClassesEquals(SchoolClass actual, SchoolClass expected)
