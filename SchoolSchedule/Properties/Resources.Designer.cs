@@ -69,8 +69,7 @@ namespace SchoolSchedule.Properties {
         ///	day_of_week numeric,
         ///	exercise_number numeric,
         ///	auditory numeric,
-        ///	FOREIGN KEY (lesson_id) REFERENCES lesson(id),
-        ///	FOREIGN KEY (teacher_id) REFERENCES teacher(id),
+        ///	FOREIGN KEY (teacher_id, lesson_id) REFERENCES teacher_lesson(teacher_id, lesson_id),
         ///	FOREIGN KEY (school_class_id) REFERENCES school_class(id)
         ///);
         ///
@@ -80,7 +79,8 @@ namespace SchoolSchedule.Properties {
         ///);
         ///
         ///CREATE TABLE school_class (
-        ///	id varchar NOT NULL PRIMARY  [остаток строки не уместился]&quot;;.
+        ///	id varchar NOT NULL PRIMARY KEY,
+        ///	class [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string V1_00_01__Main {
             get {

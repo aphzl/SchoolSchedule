@@ -74,6 +74,33 @@ namespace SchoolScheduleTests
             LastName = "uoieurw"
         };
 
+        private static readonly TeacherLesson teacherLesson = new TeacherLesson
+        {
+            TeacherId = teacher.Id,
+            LessonId = lesson.Id,
+            Teacher = teacher,
+            Lesson = lesson
+        };
+
+        private static readonly TeacherLesson teacherLesson1 = new TeacherLesson
+        {
+            TeacherId = teacher.Id,
+            LessonId = lesson.Id,
+            Teacher = teacher1,
+            Lesson = lesson1
+        };
+
+        private static readonly Exercise exercise = new Exercise
+        {
+            Id = Guid.NewGuid().ToString(),
+            DayOfWeek = (int) DayOfWeek.Monday,
+            ExerciseNumber = 1,
+            SchoolClass = sClass,
+            Auditory = 22,
+            
+            TeacherLesson = teacherLesson
+        };
+
         [TestInitialize()]
         public void Startup()
         {
@@ -113,6 +140,15 @@ namespace SchoolScheduleTests
             var savedTeacher1 = service.Find((Teacher t) => t.Id == teacher1.Id);
             AssertTeachersEquals(savedTeacher1, teacher1);
 
+            service.Save(teacherLesson);
+            var savedTeacherLesson = service.Find((TeacherLesson tl) => tl.LessonId == teacherLesson.Lesson.Id && tl.TeacherId == teacherLesson.Teacher.Id);
+            AssertTeacherLessonEquals(savedTeacherLesson, teacherLesson);
+
+            service.Save(exercise);
+            var savedExercise = service.Find((Exercise e) => e.Id == exercise.Id);
+            AssertExercisesEquals(savedExercise, exercise);
+
+
             sClass.ClassNumber = 4;
             service.Save(sClass);
             var savedChangedClass = service.Find((SchoolClass c) => c.Id == sClass.Id);
@@ -134,12 +170,20 @@ namespace SchoolScheduleTests
             var savedChangedTeacher = service.Find((Teacher t) => t.Id == teacher.Id);
             AssertTeachersEquals(savedChangedTeacher, teacher);
 
+            exercise.Auditory = 434;
+            service.Save(exercise);
+            var savedChangedExercise = service.Find((Exercise e) => e.Id == exercise.Id);
+            AssertExercisesEquals(savedChangedExercise, exercise);
+
             service.Delete(student);
             Assert.IsNull(service.Find((Student s) => s.Id == student.Id));
             Assert.IsNotNull(service.Find((SchoolClass c) => c.Id == sClass1.Id));
             service.Delete(student1);
             Assert.IsNull(service.Find((Student s) => s.Id == student1.Id));
             Assert.IsNotNull(service.Find((SchoolClass c) => c.Id == sClass.Id));
+
+            service.Delete(exercise);
+            Assert.IsNull(service.Find((Exercise e) => e.Id == exercise.Id));
 
             service.Delete(sClass);
             Assert.IsNull(service.Find((SchoolClass c) => c.Id == sClass.Id));
@@ -208,6 +252,17 @@ namespace SchoolScheduleTests
                 new List<Teacher> { teacher, teacher1 },
                 t => t.Id,
                 (a, e) => AssertTeachersEquals(a, e));
+
+            service.Delete(teacher1);
+            Assert.IsNull(service.Find((TeacherLesson tl) => tl.LessonId == lesson.Id && tl.TeacherId == teacher1.Id));
+
+            service.Delete(new TeacherLesson { Teacher = teacher, Lesson = lesson });
+            teacherWithLesson = service.Find((Teacher t) => t.Id == teacher.Id);
+            AssertListsElementsAreEqual(
+                teacherWithLesson.Lessons.ToList(),
+                new List<Lesson> { lesson1 },
+                l => l.Id,
+                (a, e) => AssertLessonsEquals(a, e));
         }
 
         private void AssertListsElementsAreEqual<T>(
@@ -263,6 +318,27 @@ namespace SchoolScheduleTests
             Assert.IsTrue(actual.FirstName == expected.FirstName);
             Assert.IsTrue(actual.MidName == expected.MidName);
             Assert.IsTrue(actual.LastName == expected.LastName);
+        }
+
+        private void AssertTeacherLessonEquals(TeacherLesson actual, TeacherLesson expected)
+        {
+            Assert.IsNotNull(actual);
+            Assert.IsTrue(actual.LessonId == expected.LessonId);
+            Assert.IsTrue(actual.TeacherId == expected.TeacherId);
+            AssertLessonsEquals(actual.Lesson, expected.Lesson);
+            AssertTeachersEquals(actual.Teacher, expected.Teacher);
+        }
+
+        private void AssertExercisesEquals(Exercise actual, Exercise expected)
+        {
+            Assert.IsNotNull(actual);
+            Assert.IsTrue(actual.Id == expected.Id);
+            Assert.IsTrue(actual.DayOfWeek == expected.DayOfWeek);
+            Assert.IsTrue(actual.ExerciseNumber == expected.ExerciseNumber);
+            Assert.IsTrue(actual.Auditory == expected.Auditory);
+            Assert.IsTrue(actual.DayOfWeek == expected.DayOfWeek);
+            AssertTeacherLessonEquals(actual.TeacherLesson, expected.TeacherLesson);
+            AssertClassesEquals(actual.SchoolClass, expected.SchoolClass);
         }
     }
 }

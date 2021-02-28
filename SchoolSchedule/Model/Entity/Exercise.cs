@@ -8,13 +8,7 @@ namespace SchoolSchedule.Model.Entity
     {
         private const string tableName = "exercise";
 
-        public override string TableName { get => tableName; }
-
-        [ForeignKey("lesson_id")]
-        public Lesson Lesson { get; set; }
-
-        [ForeignKey("teacher_id")]
-        public Teacher Teacher { get; set; }
+        public override string TableName { get => tableName; }        
 
         [Column("day_of_week")]
         public int DayOfWeek { get; set; }
@@ -28,13 +22,25 @@ namespace SchoolSchedule.Model.Entity
         [Column("auditory")]
         public int Auditory { get; set; }
 
+        [Column("teacher_id")]
+        public string TeacherId { get; set; }
+
+        [Column("lesson_id")]
+        public string LessonId { get; set; }
+
+        public TeacherLesson TeacherLesson { get; set; }
+
+        [NotMapped]
+        public Lesson Lesson { get => TeacherLesson?.Lesson; }
+
+        [NotMapped]
+        public Teacher Teacher { get => TeacherLesson?.Teacher; }
         public object Clone()
         {
             return new Exercise()
             {
                 Id = Id,
-                Lesson = Lesson,
-                Teacher = Teacher,
+                TeacherLesson = TeacherLesson,
                 DayOfWeek = DayOfWeek,
                 ExerciseNumber = ExerciseNumber,
                 SchoolClass = SchoolClass,

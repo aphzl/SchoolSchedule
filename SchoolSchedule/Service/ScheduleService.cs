@@ -58,8 +58,8 @@ namespace SchoolSchedule.Service
         {
             var savingEntity = exercise.Clone() as Exercise;
 
-            HandleForeignKey(() => savingEntity.Lesson, l => savingEntity.Lesson = l);
-            HandleForeignKey(() => savingEntity.Teacher, t => savingEntity.Teacher = t);
+            HandleForeignKey(() => savingEntity.TeacherLesson, tl => savingEntity.TeacherLesson = tl);
+            HandleForeignKey(() => savingEntity.SchoolClass, c => savingEntity.SchoolClass = c);
 
             return SaveEntityAndUpdate(savingEntity);
         }
@@ -90,9 +90,11 @@ namespace SchoolSchedule.Service
         public Exercise Find(Func<Exercise, bool> predicate)
             => dbContext
                 .Exercises
-                .Include(e => e.Lesson)
                 .Include(e => e.SchoolClass)
-                .Include(e => e.Teacher)
+                .Include(e => e.TeacherLesson)
+                    .ThenInclude(t => t.Teacher)
+                .Include(e => e.TeacherLesson)
+                    .ThenInclude(t => t.Lesson)
                 .AsNoTracking()
                 .FirstOrDefault(predicate);
 

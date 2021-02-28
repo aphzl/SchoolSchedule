@@ -6,8 +6,7 @@ CREATE TABLE exercise (
 	day_of_week numeric,
 	exercise_number numeric,
 	auditory numeric,
-	FOREIGN KEY (lesson_id) REFERENCES lesson(id),
-	FOREIGN KEY (teacher_id) REFERENCES teacher(id),
+	FOREIGN KEY (teacher_id, lesson_id) REFERENCES teacher_lesson(teacher_id, lesson_id),
 	FOREIGN KEY (school_class_id) REFERENCES school_class(id)
 );
 
