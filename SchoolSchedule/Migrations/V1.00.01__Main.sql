@@ -6,8 +6,8 @@ CREATE TABLE exercise (
 	day_of_week numeric,
 	exercise_number numeric,
 	auditory numeric,
-	FOREIGN KEY (teacher_id, lesson_id) REFERENCES teacher_lesson(teacher_id, lesson_id),
-	FOREIGN KEY (school_class_id) REFERENCES school_class(id)
+	CONSTRAINT teacher_id_lesson_id_fkey FOREIGN KEY (teacher_id, lesson_id) REFERENCES teacher_lesson(teacher_id, lesson_id),
+	CONSTRAINT school_class_id_fkey FOREIGN KEY (school_class_id) REFERENCES school_class(id)
 );
 
 CREATE TABLE lesson (
@@ -42,6 +42,6 @@ CREATE TABLE teacher_lesson (
 	teacher_id varchar NOT NULL,
 	lesson_id varchar NOT NULL,
 	PRIMARY KEY (teacher_id, lesson_id),
-	FOREIGN KEY (teacher_id) REFERENCES teacher(id) ON DELETE CASCADE,
-	FOREIGN KEY (lesson_id) REFERENCES lesson(id) ON DELETE CASCADE
+	CONSTRAINT teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES teacher(id) ON DELETE CASCADE,
+	CONSTRAINT lesson_id_fkey FOREIGN KEY (lesson_id) REFERENCES lesson(id) ON DELETE CASCADE
 );

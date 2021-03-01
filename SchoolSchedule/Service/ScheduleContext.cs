@@ -48,11 +48,11 @@ namespace SchoolSchedule.Service
 
         public void CleanDb()
         {
+            Clean<Exercise>();
             Clean<Student>();
             Clean<SchoolClass>();
             Clean<Teacher>();
             Clean<Lesson>();
-            Clean<Exercise>();
         }
 
         public void Clean<T>() where T : ScheduleObject, new()
@@ -62,7 +62,7 @@ namespace SchoolSchedule.Service
 
         private void CleanTable(string tableName)
         {
-            Database.ExecuteSqlRaw($"TRUNCATE TABLE {tableName}");
+            Database.ExecuteSqlRaw($"DELETE FROM {tableName}");
             SaveChanges();
         }
     }

@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SchoolSchedule.Model.Dto;
 using SchoolSchedule.Model.Entity;
 using SchoolSchedule.Service;
 using System;
@@ -84,9 +85,17 @@ namespace SchoolScheduleTests
 
         private static readonly TeacherLesson teacherLesson1 = new TeacherLesson
         {
-            TeacherId = teacher.Id,
-            LessonId = lesson.Id,
+            TeacherId = teacher1.Id,
+            LessonId = lesson1.Id,
             Teacher = teacher1,
+            Lesson = lesson1
+        };
+
+        private static readonly TeacherLesson teacherLesson2 = new TeacherLesson
+        {
+            TeacherId = teacher.Id,
+            LessonId = lesson1.Id,
+            Teacher = teacher,
             Lesson = lesson1
         };
 
@@ -97,8 +106,37 @@ namespace SchoolScheduleTests
             ExerciseNumber = 1,
             SchoolClass = sClass,
             Auditory = 22,
-            
             TeacherLesson = teacherLesson
+        };
+
+        private static readonly Exercise exercise1 = new Exercise
+        {
+            Id = Guid.NewGuid().ToString(),
+            DayOfWeek = (int) DayOfWeek.Monday,
+            ExerciseNumber = 2,
+            SchoolClass = sClass,
+            Auditory = 55,
+            TeacherLesson = teacherLesson1
+        };
+
+        private static readonly Exercise exercise2 = new Exercise
+        {
+            Id = Guid.NewGuid().ToString(),
+            DayOfWeek = (int) DayOfWeek.Friday,
+            ExerciseNumber = 4,
+            SchoolClass = sClass,
+            Auditory = 242,
+            TeacherLesson = teacherLesson
+        };
+
+        private static readonly Exercise exercise3 = new Exercise
+        {
+            Id = Guid.NewGuid().ToString(),
+            DayOfWeek = (int) DayOfWeek.Monday,
+            ExerciseNumber = 1,
+            SchoolClass = sClass1,
+            Auditory = 22,
+            TeacherLesson = teacherLesson2
         };
 
         [TestInitialize()]
@@ -263,11 +301,131 @@ namespace SchoolScheduleTests
                 new List<Lesson> { lesson1 },
                 l => l.Id,
                 (a, e) => AssertLessonsEquals(a, e));
+
+            service.Delete(teacher);
+            service.Delete(lesson);
+            service.Delete(lesson1);
+        }
+
+        [TestMethod]
+        public void ScheduleTest()
+        {
+            service.Save(teacher);
+            service.Save(teacher1);
+            service.Save(lesson);
+            service.Save(lesson1);
+            service.Save(sClass);
+            service.Save(sClass1);
+            service.Save(student);
+            service.Save(student1);
+            service.AssignLessonToTeacher(lesson, teacher);
+            service.AssignLessonToTeacher(lesson1, teacher1);
+            service.AssignLessonToTeacher(lesson1, teacher);
+
+            service.SaveExercises(exercise, exercise1, exercise2, exercise3);
+
+            var expectedFullWeekSchedule = new WeekSchedule
+            {
+                ScheduleByDay = new Dictionary<DayOfWeek, DaySchedule>
+                {
+                    [DayOfWeek.Monday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [1] = new List<Exercise> { exercise, exercise3 },
+                            [2] = new List<Exercise> { exercise1 }
+                        }
+                    },
+                    [DayOfWeek.Friday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [4] = new List<Exercise> { exercise2 }
+                        }
+                    }
+                }
+            };
+            var expectedClassWeekSchedule = new WeekSchedule
+            {
+                ScheduleByDay = new Dictionary<DayOfWeek, DaySchedule>
+                {
+                    [DayOfWeek.Monday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [1] = new List<Exercise> { exercise },
+                            [2] = new List<Exercise> { exercise1 }
+                        }
+                    },
+                    [DayOfWeek.Friday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [4] = new List<Exercise> { exercise2 }
+                        }
+                    }
+                }
+            };
+            var expectedTeacherWeekSchedule = new WeekSchedule
+            {
+                ScheduleByDay = new Dictionary<DayOfWeek, DaySchedule>
+                {
+                    [DayOfWeek.Monday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [1] = new List<Exercise> { exercise, exercise3 }
+                        }
+                    },
+                    [DayOfWeek.Friday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [4] = new List<Exercise> { exercise2 }
+                        }
+                    }
+                }
+            };
+            var expectedStudentWeekSchedule = new WeekSchedule
+            {
+                ScheduleByDay = new Dictionary<DayOfWeek, DaySchedule>
+                {
+                    [DayOfWeek.Monday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [1] = new List<Exercise> { exercise },
+                            [2] = new List<Exercise> { exercise1 }
+                        }
+                    },
+                    [DayOfWeek.Friday] = new DaySchedule
+                    {
+                        ExerciseByLessonNumber = new Dictionary<int, List<Exercise>>
+                        {
+                            [4] = new List<Exercise> { exercise2 }
+                        }
+                    }
+                }
+            };
+
+            var fullSchedule = service.GetFullWeekSchedule();
+            AssertWeekSchedulesEquals(fullSchedule, expectedFullWeekSchedule);
+
+            var classSchedule = service.GetClassWeekSchedule(sClass.ClassNumber, sClass.Letter);
+            AssertWeekSchedulesEquals(classSchedule, expectedClassWeekSchedule);
+
+            var teacherSchedule = service.GetTeacherWeekSchedule(teacher.FirstName, teacher.MidName, teacher.LastName);
+            AssertWeekSchedulesEquals(teacherSchedule, expectedTeacherWeekSchedule);
+
+            var studentSchedule = service.GetStudentWeekSchedule(student.FirstName, student.MidName, student.LastName);
+            AssertWeekSchedulesEquals(studentSchedule, expectedStudentWeekSchedule);
+
+            service.CleanDb();
         }
 
         private void AssertListsElementsAreEqual<T>(
-            List<T> actualList,
-            List<T> expectedList,
+            ICollection<T> actualList,
+            ICollection<T> expectedList,
             Func<T, object> keySelector,
             Action<T, T> asserter)
         {
@@ -339,6 +497,33 @@ namespace SchoolScheduleTests
             Assert.IsTrue(actual.DayOfWeek == expected.DayOfWeek);
             AssertTeacherLessonEquals(actual.TeacherLesson, expected.TeacherLesson);
             AssertClassesEquals(actual.SchoolClass, expected.SchoolClass);
+        }
+
+        private void AssertWeekSchedulesEquals(WeekSchedule actual, WeekSchedule expected)
+        {
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected.ScheduleByDay.Count, actual.ScheduleByDay.Count);
+            AssertListsElementsAreEqual(
+                actual.ScheduleByDay, expected.ScheduleByDay,
+                p => p.Key,
+                (a, e) =>
+                {
+                    Assert.AreEqual(e.Key, a.Key);
+                    AssertListsElementsAreEqual(
+                        a.Value.ExerciseByLessonNumber, e.Value.ExerciseByLessonNumber,
+                        dp => dp.Key,
+                        (da, de) =>
+                        {
+                            Assert.AreEqual(de.Key, da.Key);
+                            AssertListsElementsAreEqual(
+                                da.Value, de.Value,
+                                e => e.Id,
+                                (ae, ee) => AssertExercisesEquals(ae, ee)
+                            );
+                        }
+                    );
+                }
+            );
         }
     }
 }

@@ -64,28 +64,45 @@ namespace SchoolSchedule.Service
             return SaveEntityAndUpdate(savingEntity);
         }
 
+        public void SaveExercises(params Exercise[] exercises)
+        {
+            foreach (var exercise in exercises)
+            {
+                Save(exercise);
+            }
+        }
+
         public void AssignLessonToTeacher(Lesson lesson, Teacher teacher)
             => Save(new TeacherLesson { Teacher = teacher, Lesson = lesson });
 
         public WeekSchedule GetFullWeekSchedule()
-            => ToWeekSchedule(dbContext.Exercises.ToList());
+            => ToWeekSchedule(
+                dbContext
+                    .Exercises
+                    .Include(e => e.SchoolClass)
+                    .Include(e => e.TeacherLesson)
+                        .ThenInclude(t => t.Teacher)
+                    .Include(e => e.TeacherLesson)
+                        .ThenInclude(t => t.Lesson)
+                    .AsNoTracking()
+                    .ToList());
 
-        /*public WeekSchedule GetStudentWeekSchedule(string firstName, string midName, string lastName)
-            => GetWeekSchedule<Student>(
-                s => s.FirstName == firstName && s.MidName == midName && s.LastName == lastName);
+        public WeekSchedule GetStudentWeekSchedule(string firstName, string midName, string lastName)
+            => GetWeekSchedule(Find(
+                (Student s) => s.FirstName == firstName
+                    && s.MidName == midName
+                    && s.LastName == lastName));
 
         public WeekSchedule GetClassWeekSchedule(int classNumber, string classLetter)
-            => GetWeekSchedule<SchoolClass>(
-                c => c.ClassNumber == classNumber && c.Letter == classLetter);
+            => GetWeekSchedule(Find(
+                (SchoolClass c) => c.ClassNumber == classNumber
+                    && c.Letter == classLetter));
 
         public WeekSchedule GetTeacherWeekSchedule(string firstName, string midName, string lastName)
-            => GetWeekSchedule<Teacher>(
-                t => t.FirstName == firstName && t.MidName == midName && t.LastName == lastName);*/
-
-        public List<SchoolClass> GetAllSchollClasses()
-        {
-            return dbContext.SchoolClasses.ToListAsync().Result;
-        }
+            => GetWeekSchedule(Find(
+                (Teacher t) => t.FirstName == firstName
+                    && t.MidName == midName
+                    && t.LastName == lastName));
 
         public Exercise Find(Func<Exercise, bool> predicate)
             => dbContext
@@ -111,6 +128,11 @@ namespace SchoolSchedule.Service
             => dbContext
                 .SchoolClasses
                 .Include(c => c.Exercises)
+                    .ThenInclude(e => e.TeacherLesson)
+                        .ThenInclude(tl => tl.Lesson)
+                .Include(c => c.Exercises)
+                    .ThenInclude(e => e.TeacherLesson)
+                        .ThenInclude(tl => tl.Teacher)
                 .Include(c => c.Students)
                 .AsNoTracking()
                 .FirstOrDefault(predicate);
@@ -119,6 +141,13 @@ namespace SchoolSchedule.Service
             => dbContext
                 .Students
                 .Include(s => s.SchoolClass)
+                    .ThenInclude(c => c.Exercises)
+                        .ThenInclude(e => e.TeacherLesson)
+                            .ThenInclude(tl => tl.Lesson)
+                .Include(s => s.SchoolClass)
+                    .ThenInclude(c => c.Exercises)
+                        .ThenInclude(e => e.TeacherLesson)
+                            .ThenInclude(tl => tl.Teacher)
                 .AsNoTracking()
                 .FirstOrDefault(predicate);
 
@@ -127,6 +156,14 @@ namespace SchoolSchedule.Service
                 .Teachers
                 .Include(t => t.TeacherLessons)
                     .ThenInclude(t => t.Lesson)
+                .Include(t => t.Exercises)
+                    .ThenInclude(e => e.TeacherLesson)
+                        .ThenInclude(tl => tl.Lesson)
+                .Include(t => t.Exercises)
+                    .ThenInclude(e => e.TeacherLesson)
+                        .ThenInclude(tl => tl.Teacher)
+                .Include(t => t.Exercises)
+                    .ThenInclude(e => e.SchoolClass)
                 .AsNoTracking()
                 .FirstOrDefault(predicate);
 
@@ -138,6 +175,12 @@ namespace SchoolSchedule.Service
                 .AsNoTracking()
                 .FirstOrDefault(predicate);
 
+        public List<TeacherLesson> FindTeacherLessons(string teacherId)
+            => dbContext
+                .TeacherLessons
+                .Where(tl => tl.TeacherId == teacherId)
+                .ToList();
+
         public void Delete<T>(T entity) where T : class, IKeyable
         {
             var existing = dbContext.Find<T>(entity.Key);
@@ -147,6 +190,8 @@ namespace SchoolSchedule.Service
             dbContext.Remove(existing);
             dbContext.SaveChanges();
         }
+
+        public void CleanDb() => dbContext.CleanDb();
 
         private void HandleForeignKey<T>(Func<T> getForeign, Action<T> setForeign)
             where T : class, IKeyable
@@ -179,15 +224,13 @@ namespace SchoolSchedule.Service
             return existing;
         }
 
-        /*private WeekSchedule GetWeekSchedule<T>(Func<T, bool> entityPredicate)
+        private WeekSchedule GetWeekSchedule<T>(T entity)
             where T : class, IExercised
         {
-            var entity = Find(entityPredicate);
-
             if (entity == null) return null;
 
             return ToWeekSchedule(entity.Exercises);
-        }*/
+        }
 
         private WeekSchedule ToWeekSchedule(IList<Exercise> exercises)
             => new WeekSchedule

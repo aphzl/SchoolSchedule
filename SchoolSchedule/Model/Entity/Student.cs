@@ -24,7 +24,7 @@ namespace SchoolSchedule.Model.Entity
         public SchoolClass SchoolClass { get; set; }
 
         [NotMapped]
-        public IList<Exercise> Exercises { get => SchoolClass?.Exercises; }
+        public IList<Exercise> Exercises { get => SchoolClass?.Exercises ?? new List<Exercise>(); }
 
         public object Clone()
         {
