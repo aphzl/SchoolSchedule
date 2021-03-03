@@ -1,8 +1,6 @@
 ﻿using SchoolScheduleApp.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using static SchoolScheduleApp.ConsoleCommander;
 
 namespace SchoolScheduleApp
 {

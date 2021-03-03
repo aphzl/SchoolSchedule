@@ -1,7 +1,9 @@
-﻿using SchoolSchedule.Model.Entity;
+﻿using SchoolSchedule.Model.Dto;
+using SchoolSchedule.Model.Entity;
 using SchoolSchedule.Service;
 using SchoolScheduleApp.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SchoolScheduleApp
@@ -13,12 +15,10 @@ namespace SchoolScheduleApp
 
         private readonly CommandMap<MainCommand> mainCommandsMap;
         private readonly CommandMap<Command> createCommandsMap;
-        //private readonly CommandMap<Command> updateCommandsMap;
         private readonly CommandMap<Command> getCommandsMap;
         private readonly CommandMap<Command> deleteCommandsMap;
 
         private const string CREATE = "create";
-        //private const string UPDATE = "update";
         private const string GET = "get";
         private const string DELETE = "delete";
 
@@ -35,10 +35,19 @@ namespace SchoolScheduleApp
         private const string EXERCISE = "exercise";
         private const string ALL = "all";
 
-        private const string STUDENT_SHEDULE = "studentschedule";
-        private const string TEACHER_SCHEDULE = "tacherschedule";
+        private const string TEACHER_SCHEDULE = "teacherschedule";
         private const string CLASS_SCHEDULE = "classschedule";
-        private const string FULL_SCHEDULE = "classschedule";
+        private const string FULL_SCHEDULE = "fullschedule";
+
+        private static readonly Dictionary<int, string> days = new Dictionary<int, string>
+        {
+            [1] = "Понедельник",
+            [2] = "Вторник",
+            [3] = "Среда",
+            [4] = "Четверг",
+            [5] = "Пятница",
+            [6] = "Суббота",
+        };
 
         public ConsoleCommander(
             ScheduleService service,
@@ -48,7 +57,6 @@ namespace SchoolScheduleApp
             mainCommandsMap = new CommandMap<MainCommand>
             {
                 [CREATE] = Create,
-                //[UPDATE] = Update,
                 [GET] = Get,
                 [DELETE] = Delete
             };
@@ -64,26 +72,15 @@ namespace SchoolScheduleApp
                 [EXERCISE] = CreateExercise(service, requestInput)
             };
 
-            /*updateCommandsMap = new CommandMap<Command>
-            {
-                [STUDENT] = UpdateStudent,
-                [CLASS] = UpdateClass,
-                [LESSON] = UpdateLesson,
-                [TEACHER] = UpdateTeacher,
-                [TEACHER_LESSON] = UpdateTeacherLesson,
-                [EXERCISE] = UpdateExercise
-            };*/
-
             getCommandsMap = new CommandMap<Command>
             {
                 [STUDENTS] = GetStudents(service, writeln),
                 [CLASSES] = GetClasses(service, writeln),
                 [LESSONS] = GetLessons(service, writeln),
                 [TEACHERS] = GetTeachers(service, writeln),
-                [STUDENT_SHEDULE] = GetStudentSchedule,
-                [TEACHER_SCHEDULE] = GetTeacherSchedule,
-                [CLASS_SCHEDULE] = GetClassSchedule,
-                [FULL_SCHEDULE] = GetFullSchedule,
+                [TEACHER_SCHEDULE] = GetTeacherSchedule(service, requestInput, writeln),
+                [CLASS_SCHEDULE] = GetClassSchedule(service, requestInput, writeln),
+                [FULL_SCHEDULE] = GetFullSchedule(service, writeln),
             };
 
             deleteCommandsMap = new CommandMap<Command>
@@ -125,8 +122,6 @@ namespace SchoolScheduleApp
         }
 
         private MainCommand Create => args => Execute(createCommandsMap, args);
-
-        //private MainCommand Update => args => Execute(updateCommandsMap, args);
 
         private MainCommand Get => args => Execute(getCommandsMap, args);
 
@@ -291,37 +286,6 @@ namespace SchoolScheduleApp
             };
 
 
-        /*private Command UpdateStudent = args =>
-        {
-
-        };
-
-        private Command UpdateClass = args =>
-        {
-
-        };
-
-        private Command UpdateLesson = args =>
-        {
-
-        };
-
-        private Command UpdateTeacher = args =>
-        {
-
-        };
-
-        private Command UpdateTeacherLesson = args =>
-        {
-
-        };
-
-        private Command UpdateExercise = args =>
-        {
-
-        };*/
-
-
         private Command GetStudents(
             ScheduleService service,
             Action<string> writeln)
@@ -363,32 +327,53 @@ namespace SchoolScheduleApp
             Action<string> writeln)
             => args =>
             {
-            foreach (var teacher in service.FindTeachers())
+                foreach (var teacher in service.FindTeachers())
+                {
+                    WriteTeacherInfo(teacher, writeln, true);
+                    writeln("");
+                }
+            };
+
+        private Command GetTeacherSchedule(
+            ScheduleService service,
+            Func<string, string> requestInput,
+            Action<string> writeln)
+            => args =>
             {
-                WriteTeacherInfo(teacher, writeln, true);
-                writeln("");
-            }
-        };
+                var firstName = requestInput("Введите имя");
+                var midName = requestInput("Введите отчество");
+                var lastName = requestInput("Введите фамилию");
 
-        private Command GetStudentSchedule = args =>
-        {
+                var schedule = service.GetTeacherWeekSchedule(firstName, midName, lastName);
 
-        };
+                WriteScheduleInfo(schedule, writeln);
+            };
 
-        private Command GetTeacherSchedule = args =>
-        {
+        private Command GetClassSchedule(
+            ScheduleService service,
+            Func<string, string> requestInput,
+            Action<string> writeln)
+            => args =>
+            {
+                var numberString = requestInput("Введите номер класса");
+                if (!int.TryParse(numberString, out int number))
+                    throw new CommandException($"Неверный формат номера класса '{numberString}'");
 
-        };
+                var letter = requestInput("Введите букву класса");
 
-        private Command GetClassSchedule = args =>
-        {
+                var schedule = service.GetClassWeekSchedule(number, letter);
 
-        };
+                WriteScheduleInfo(schedule, writeln);
+            };
 
-        private Command GetFullSchedule = args =>
-        {
-
-        };
+        private Command GetFullSchedule(
+            ScheduleService service,
+            Action<string> writeln)
+            => args =>
+            {
+                var schedule = service.GetFullWeekSchedule();
+                WriteScheduleInfo(schedule, writeln);
+            };
 
 
         private Command DeleteStudent(
@@ -536,6 +521,57 @@ namespace SchoolScheduleApp
                     WriteLessonsInfo(lesson, writeln, false);
                 }
             }
+        }
+
+        private static void WriteScheduleInfo(WeekSchedule schedule, Action<string> writeln)
+        {
+            if (schedule == null) return;
+
+            var list = schedule.ScheduleByDay
+                .OrderBy(s => s.Key)
+                .ToList();
+
+            foreach (var s in list)
+            {
+                WriteDayScheduleInfo(s.Value, writeln, (int) s.Key);
+                writeln("--");
+            }
+        }
+
+        private static void WriteDayScheduleInfo(DaySchedule schedule, Action<string> writeln, int day)
+        {
+            var exercises = schedule.ExerciseByLessonNumber
+                .OrderBy(e => e.Key)
+                .ToList();
+
+            writeln($"---{days[day]}---");
+
+            foreach (var pair in exercises)
+            {
+                var list = pair.Value
+                    .OrderBy(e => e.SchoolClass.Id)
+                    .ToList();
+
+                writeln($"---Занятие №{pair.Key}");
+
+                foreach (var e in list)
+                {
+                    WriteExerciseInfo(e, writeln);
+                    writeln("-");
+                }
+
+                writeln("-");
+            }
+        }
+
+        private static void WriteExerciseInfo(Exercise exercise, Action<string> writeln)
+        {
+            writeln($"---Информация о занятии---");
+            writeln($"ID: {exercise.Id}");
+            writeln($"Аудитория: {exercise.Auditory}");
+            if (exercise.SchoolClass != null) WriteClassInfo(exercise.SchoolClass, writeln);
+            if (exercise.Teacher != null) WriteTeacherInfo(exercise.Teacher, writeln, false);
+            if (exercise.Lesson != null) WriteLessonsInfo(exercise.Lesson, writeln, false);
         }
     }
 }

@@ -92,20 +92,20 @@ namespace SchoolSchedule.Service
 
         public WeekSchedule GetStudentWeekSchedule(string firstName, string midName, string lastName)
             => GetWeekSchedule(Find(
-                (Student s) => s.FirstName == firstName
-                    && s.MidName == midName
-                    && s.LastName == lastName));
+                (Student s) => s.FirstName.ToLower() == firstName.ToLower()
+                    && s.MidName.ToLower() == midName.ToLower()
+                    && s.LastName.ToLower() == lastName.ToLower()));
 
         public WeekSchedule GetClassWeekSchedule(int classNumber, string classLetter)
             => GetWeekSchedule(Find(
                 (SchoolClass c) => c.ClassNumber == classNumber
-                    && c.Letter == classLetter));
+                    && c.Letter.ToLower() == classLetter.ToLower()));
 
         public WeekSchedule GetTeacherWeekSchedule(string firstName, string midName, string lastName)
             => GetWeekSchedule(Find(
-                (Teacher t) => t.FirstName == firstName
-                    && t.MidName == midName
-                    && t.LastName == lastName));
+                (Teacher t) => t.FirstName.ToLower() == firstName.ToLower()
+                    && t.MidName.ToLower() == midName.ToLower()
+                    && t.LastName.ToLower() == lastName.ToLower()));
 
         public Exercise Find(Func<Exercise, bool> predicate)
             => dbContext
