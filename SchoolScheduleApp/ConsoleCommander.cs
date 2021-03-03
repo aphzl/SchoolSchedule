@@ -13,7 +13,7 @@ namespace SchoolScheduleApp
 
         private readonly CommandMap<MainCommand> mainCommandsMap;
         private readonly CommandMap<Command> createCommandsMap;
-        private readonly CommandMap<Command> updateCommandsMap;
+        //private readonly CommandMap<Command> updateCommandsMap;
         private readonly CommandMap<Command> getCommandsMap;
         private readonly CommandMap<Command> deleteCommandsMap;
 
@@ -24,9 +24,13 @@ namespace SchoolScheduleApp
 
         private const string DEMO = "demo";
         private const string STUDENT= "student";
+        private const string STUDENTS = "students";
         private const string CLASS = "class";
+        private const string CLASSES = "classes";
         private const string LESSON = "lesson";
+        private const string LESSONS = "lessons";
         private const string TEACHER = "teacher";
+        private const string TEACHERS = "teachers";
         private const string TEACHER_LESSON = "teacherlesson";
         private const string EXERCISE = "exercise";
 
@@ -44,7 +48,7 @@ namespace SchoolScheduleApp
             mainCommandsMap = new CommandMap<MainCommand>
             {
                 [CREATE] = Create,
-                [UPDATE] = Update,
+                //[UPDATE] = Update,
                 [GET] = Get,
                 [DELETE] = Delete
             };
@@ -60,7 +64,7 @@ namespace SchoolScheduleApp
                 [EXERCISE] = CreateExercise(service, requestInput)
             };
 
-            updateCommandsMap = new CommandMap<Command>
+            /*updateCommandsMap = new CommandMap<Command>
             {
                 [STUDENT] = UpdateStudent,
                 [CLASS] = UpdateClass,
@@ -68,16 +72,14 @@ namespace SchoolScheduleApp
                 [TEACHER] = UpdateTeacher,
                 [TEACHER_LESSON] = UpdateTeacherLesson,
                 [EXERCISE] = UpdateExercise
-            };
+            };*/
 
             getCommandsMap = new CommandMap<Command>
             {
-                [STUDENT] = GetStudent,
-                [CLASS] = GetClass,
-                [LESSON] = GetLesson,
-                [TEACHER] = GetTeacher,
-                [TEACHER_LESSON] = GetTeacherLesson,
-                [EXERCISE] = GetExercise,
+                [STUDENTS] = GetStudents(service, writeln),
+                [CLASSES] = GetClasses(service, writeln),
+                [LESSONS] = GetLessons(service, writeln),
+                [TEACHERS] = GetTeachers(service, writeln),
                 [STUDENT_SHEDULE] = GetStudentSchedule,
                 [TEACHER_SCHEDULE] = GetTeacherSchedule,
                 [CLASS_SCHEDULE] = GetClassSchedule,
@@ -86,12 +88,12 @@ namespace SchoolScheduleApp
 
             deleteCommandsMap = new CommandMap<Command>
             {
-                [STUDENT] = DeleteStudent,
-                [CLASS] = DeleteClass,
-                [LESSON] = DeleteLesson,
-                [TEACHER] = DeleteTeacher,
-                [TEACHER_LESSON] = DeleteTeacherLesson,
-                [EXERCISE] = DeleteExercise
+                [STUDENT] = DeleteStudent(service, requestInput),
+                [CLASS] = DeleteClass(service, requestInput),
+                [LESSON] = DeleteLesson(service, requestInput),
+                [TEACHER] = DeleteTeacher(service, requestInput),
+                [TEACHER_LESSON] = DeleteTeacherLesson(service, requestInput),
+                [EXERCISE] = DeleteExercise(service, requestInput)
             };
         }
 
@@ -123,7 +125,7 @@ namespace SchoolScheduleApp
 
         private MainCommand Create => args => Execute(createCommandsMap, args);
 
-        private MainCommand Update => args => Execute(updateCommandsMap, args);
+        //private MainCommand Update => args => Execute(updateCommandsMap, args);
 
         private MainCommand Get => args => Execute(getCommandsMap, args);
 
@@ -278,7 +280,7 @@ namespace SchoolScheduleApp
             };
 
 
-        private Command UpdateStudent = args =>
+        /*private Command UpdateStudent = args =>
         {
 
         };
@@ -306,37 +308,55 @@ namespace SchoolScheduleApp
         private Command UpdateExercise = args =>
         {
 
-        };
+        };*/
 
 
-        private Command GetStudent = args =>
-        {
+        private Command GetStudents(
+            ScheduleService service,
+            Action<string> writeln)
+            => args =>
+            {
+                foreach (var student in service.FindStudents())
+                {
+                    WriteStudentInfo(student, writeln);
+                    writeln("");
+                }
+            };
 
-        };
+        private Command GetClasses(
+            ScheduleService service,
+            Action<string> writeln)
+            => args =>
+            {
+                foreach (var sClass in service.FindClasses())
+                {
+                    WriteClassInfo(sClass, writeln);
+                    writeln("");
+                }
+            };
 
-        private Command GetClass = args =>
-        {
+        private Command GetLessons(
+            ScheduleService service,
+            Action<string> writeln)
+            => args =>
+            {
+                foreach (var lesson in service.FIndLessons())
+                {
+                    WriteLessonsInfo(lesson, writeln, true);
+                    writeln("");
+                }
+            };
 
-        };
-
-        private Command GetLesson = args =>
-        {
-
-        };
-
-        private Command GetTeacher = args =>
-        {
-
-        };
-
-        private Command GetTeacherLesson = args =>
-        {
-
-        };
-
-        private Command GetExercise = args =>
-        {
-
+        private Command GetTeachers(
+            ScheduleService service,
+            Action<string> writeln)
+            => args =>
+            {
+            foreach (var teacher in service.FindTeachers())
+            {
+                WriteTeacherInfo(teacher, writeln, true);
+                writeln("");
+            }
         };
 
         private Command GetStudentSchedule = args =>
@@ -360,45 +380,138 @@ namespace SchoolScheduleApp
         };
 
 
-        private Command DeleteStudent = args =>
-        {
+        private Command DeleteStudent(
+            ScheduleService service,
+            Func<string, string> requestInput)
+            => args =>
+            {
+                var id = requestInput("Введите ID ученика для удаления");
+                Del(() => service.Delete(new Student { Id = id }));
+            };
 
-        };
+        private Command DeleteClass(
+            ScheduleService service,
+            Func<string, string> requestInput)
+            => args =>
+            {
+                var id = requestInput("Введите ID класса для удаления");
+                Del(() => service.Delete(new SchoolClass { Id = id }));
+            };
 
-        private Command DeleteClass = args =>
-        {
+        private Command DeleteLesson(
+            ScheduleService service,
+            Func<string, string> requestInput)
+            => args =>
+            {
+                var id = requestInput("Введите ID класса для удаления");
+                Del(() => service.Delete(new SchoolClass { Id = id }));
+            };
 
-        };
+        private Command DeleteTeacher(
+            ScheduleService service,
+            Func<string, string> requestInput)
+            => args =>
+            {
+                var id = requestInput("Введите ID преподавателя для удаления");
+                Del(() => service.Delete(new Teacher { Id = id }));
+            };
 
-        private Command DeleteLesson = args =>
-        {
+        private Command DeleteTeacherLesson(
+            ScheduleService service,
+            Func<string, string> requestInput)
+            => args =>
+            {
+                var teacherId = requestInput("Введите ID преподавателя");
+                var lessonId = requestInput("Введите ID предмета");
 
-        };
+                var teacherLesson = new TeacherLesson
+                {
+                    Teacher = new Teacher { Id = teacherId },
+                    Lesson = new Lesson { Id = lessonId }
+                };
 
-        private Command DeleteTeacher = args =>
-        {
+                Del(() => service.Delete(teacherLesson));
+            };
 
-        };
+        private Command DeleteExercise(
+            ScheduleService service,
+            Func<string, string> requestInput)
+            => args =>
+            {
+                var id = requestInput("Введите ID удаляемого занятия");
+                Del(() => service.Delete(new Exercise { Id = id }));
+            };
 
-        private Command DeleteTeacherLesson = args =>
-        {
+        private static void Save(Action action) => DoWithHandleException(action, "Не удалось сохранить объект");
 
-        };
+        private static void Del(Action action) => DoWithHandleException(action, "Не удалось удалить объект");
 
-        private Command DeleteExercise = args =>
-        {
-
-        };
-
-        private static void Save(Action action)
+        private static void DoWithHandleException(Action action, string message)
         {
             try
             {
                 action();
             }
-            catch (Exception e)
+            catch
             {
-                throw new CommandException("Не удалось сохранить объект");
+                throw new CommandException(message);
+            }
+        }
+
+        private static void WriteStudentInfo(
+            Student student, Action<string> writeln)
+        {
+            writeln("---Информация о студенте---");
+            writeln($"ID: {student.Id}");
+            writeln($"Имя: {student.FirstName}");
+            writeln($"Отчество: {student.MidName}");
+            writeln($"Фамилия: {student.LastName}");
+
+            
+            if (student.SchoolClass != null)
+            {
+                WriteClassInfo(student.SchoolClass, writeln);
+            }
+        }
+
+        private static void WriteClassInfo(
+            SchoolClass sClass, Action<string> writeln)
+        {
+            writeln("---Информация о классе---");
+            writeln($"ID касса: {sClass.Id}");
+            writeln($"Номер: {sClass.ClassNumber}");
+            writeln($"Буква: {sClass.Letter}");
+        }
+
+        private static void WriteLessonsInfo(Lesson lesson, Action<string> writeln, bool writeTeacherInfo)
+        {
+            writeln("---Информация о предмете---");
+            writeln($"ID предмета: {lesson.Id}");
+            writeln($"Название: {lesson.Name}");
+
+            if (writeTeacherInfo)
+            {
+                foreach (var teacher in lesson.Teachers)
+                {
+                    WriteTeacherInfo(teacher, writeln, false);
+                }
+            }
+        }
+
+        private static void WriteTeacherInfo(Teacher teacher, Action<string> writeln, bool wtiteLessonsInfo)
+        {
+            writeln("---Информация о преподавателе---");
+            writeln($"ID: {teacher.Id}");
+            writeln($"Имя: {teacher.FirstName}");
+            writeln($"Отчество: {teacher.MidName}");
+            writeln($"Фамилия: {teacher.LastName}");
+
+            if (wtiteLessonsInfo)
+            {
+                foreach (var lesson in teacher.Lessons)
+                {
+                    WriteLessonsInfo(lesson, writeln, false);
+                }
             }
         }
     }

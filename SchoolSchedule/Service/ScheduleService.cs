@@ -115,16 +115,19 @@ namespace SchoolSchedule.Service
                 .AsNoTracking()
                 .FirstOrDefault(predicate);
 
-        public Lesson Find(Func<Lesson, bool> predicate)
+        public List<Lesson> FIndLessons()
             => dbContext
                 .Lessons
                 .Include(l => l.Exercises)
                 .Include(l => l.TeacherLessons)
                     .ThenInclude(l => l.Teacher)
                 .AsNoTracking()
-                .FirstOrDefault(predicate);
+                .ToList();
+                
+        public Lesson Find(Func<Lesson, bool> predicate) => FIndLessons().FirstOrDefault(predicate);
+            
 
-        public SchoolClass Find(Func<SchoolClass, bool> predicate)
+        public List<SchoolClass> FindClasses()
             => dbContext
                 .SchoolClasses
                 .Include(c => c.Exercises)
@@ -135,9 +138,11 @@ namespace SchoolSchedule.Service
                         .ThenInclude(tl => tl.Teacher)
                 .Include(c => c.Students)
                 .AsNoTracking()
-                .FirstOrDefault(predicate);
+                .ToList();
 
-        public Student Find(Func<Student, bool> predicate)
+        public SchoolClass Find(Func<SchoolClass, bool> predicate) => FindClasses().FirstOrDefault(predicate);
+
+        public List<Student> FindStudents()
             => dbContext
                 .Students
                 .Include(s => s.SchoolClass)
@@ -149,9 +154,12 @@ namespace SchoolSchedule.Service
                         .ThenInclude(e => e.TeacherLesson)
                             .ThenInclude(tl => tl.Teacher)
                 .AsNoTracking()
-                .FirstOrDefault(predicate);
+                .ToList();
 
-        public Teacher Find(Func<Teacher, bool> predicate)
+        public Student Find(Func<Student, bool> predicate)
+            => FindStudents().FirstOrDefault(predicate);
+
+        public List<Teacher> FindTeachers()
             => dbContext
                 .Teachers
                 .Include(t => t.TeacherLessons)
@@ -165,7 +173,10 @@ namespace SchoolSchedule.Service
                 .Include(t => t.Exercises)
                     .ThenInclude(e => e.SchoolClass)
                 .AsNoTracking()
-                .FirstOrDefault(predicate);
+                .ToList();
+                
+        public Teacher Find(Func<Teacher, bool> predicate)
+            => FindTeachers().FirstOrDefault(predicate);
 
         public TeacherLesson Find(Func<TeacherLesson, bool> predicate)
             => dbContext
