@@ -7,9 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchoolSchedule", "SchoolSch
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchoolScheduleApp", "SchoolScheduleApp\SchoolScheduleApp.csproj", "{81681A0C-7DC9-4134-8D24-4BB003D9CF2B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScheduleFormApp", "ScheduleFormApp\ScheduleFormApp.csproj", "{070DE80A-B6AE-4190-B015-D7BBA3CCB3AE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoolScheduleTests", "SchoolScheduleTests\SchoolScheduleTests.csproj", "{5856927F-1436-41C8-8E94-3646EF515B21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchoolScheduleTests", "SchoolScheduleTests\SchoolScheduleTests.csproj", "{5856927F-1436-41C8-8E94-3646EF515B21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +23,6 @@ Global
 		{81681A0C-7DC9-4134-8D24-4BB003D9CF2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81681A0C-7DC9-4134-8D24-4BB003D9CF2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81681A0C-7DC9-4134-8D24-4BB003D9CF2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{070DE80A-B6AE-4190-B015-D7BBA3CCB3AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{070DE80A-B6AE-4190-B015-D7BBA3CCB3AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{070DE80A-B6AE-4190-B015-D7BBA3CCB3AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{070DE80A-B6AE-4190-B015-D7BBA3CCB3AE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5856927F-1436-41C8-8E94-3646EF515B21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5856927F-1436-41C8-8E94-3646EF515B21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5856927F-1436-41C8-8E94-3646EF515B21}.Release|Any CPU.ActiveCfg = Release|Any CPU
