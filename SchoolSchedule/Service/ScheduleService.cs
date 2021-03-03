@@ -5,12 +5,15 @@ using SchoolSchedule.Model.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 
 namespace SchoolSchedule.Service
 {
     public class ScheduleService
     {
         private readonly ScheduleContext dbContext;
+
+        private const string DEMO_BASE_RES = "Demo";
 
         private ScheduleService(ScheduleContext context)
         {
@@ -203,6 +206,12 @@ namespace SchoolSchedule.Service
         }
 
         public void CleanDb() => dbContext.CleanDb();
+
+        public void CreateDemoBase()
+        {
+            var rm = new ResourceManager(typeof(SchoolSchedule.Properties.Resources));
+            dbContext.Database.ExecuteSqlRaw(rm.GetString(DEMO_BASE_RES));
+        }
 
         private void HandleForeignKey<T>(Func<T> getForeign, Action<T> setForeign)
             where T : class, IKeyable

@@ -19,8 +19,8 @@ namespace SchoolScheduleApp
         public static ScheduleConsole Create()
         {
             var service = ScheduleService.Create(
-                b => b.UseNpgsql("host=localhost;database=sched5;username=schedule;password=schedule;"));
-            var commander = new ConsoleCommander(service, RequestInput, Console.Write, Console.WriteLine);
+                b => b.UseNpgsql("host=localhost;database=sched7;username=schedule;password=schedule;"));
+            var commander = new ConsoleCommander(service, RequestInput, Console.WriteLine);
 
             return new ScheduleConsole(commander);
         }
@@ -43,22 +43,6 @@ namespace SchoolScheduleApp
                 }
             }
         }
-
-        /*private void SaveSchoolClass(List<string> args)
-        {
-            var id = RequestInput("Введите ID");
-            var classNumber = RequestInput("Введите номер");
-            var letter = RequestInput("Введите букву");
-
-            var schoolClass = new SchoolClass
-            {
-                Id = id,
-                Letter = letter,
-                ClassNumber = int.Parse(classNumber)
-            };
-
-            scheduleService.Save(schoolClass);
-        }*/
 
         private static string RequestInput(string requestText)
         {

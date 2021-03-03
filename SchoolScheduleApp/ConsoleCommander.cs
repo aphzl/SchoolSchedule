@@ -18,7 +18,7 @@ namespace SchoolScheduleApp
         private readonly CommandMap<Command> deleteCommandsMap;
 
         private const string CREATE = "create";
-        private const string UPDATE = "update";
+        //private const string UPDATE = "update";
         private const string GET = "get";
         private const string DELETE = "delete";
 
@@ -33,6 +33,7 @@ namespace SchoolScheduleApp
         private const string TEACHERS = "teachers";
         private const string TEACHER_LESSON = "teacherlesson";
         private const string EXERCISE = "exercise";
+        private const string ALL = "all";
 
         private const string STUDENT_SHEDULE = "studentschedule";
         private const string TEACHER_SCHEDULE = "tacherschedule";
@@ -42,7 +43,6 @@ namespace SchoolScheduleApp
         public ConsoleCommander(
             ScheduleService service,
             Func<string, string> requestInput,
-            Action<string> write,
             Action<string> writeln)
         {
             mainCommandsMap = new CommandMap<MainCommand>
@@ -55,7 +55,7 @@ namespace SchoolScheduleApp
 
             createCommandsMap = new CommandMap<Command>
             {
-                [DEMO] = CreateDemo,
+                [DEMO] = CreateDemo(service, requestInput, writeln),
                 [STUDENT] = CreateStudent(service, requestInput),
                 [CLASS] = CreateClass(service, requestInput),
                 [LESSON] = CreateLesson(service, requestInput),
@@ -93,7 +93,8 @@ namespace SchoolScheduleApp
                 [LESSON] = DeleteLesson(service, requestInput),
                 [TEACHER] = DeleteTeacher(service, requestInput),
                 [TEACHER_LESSON] = DeleteTeacherLesson(service, requestInput),
-                [EXERCISE] = DeleteExercise(service, requestInput)
+                [EXERCISE] = DeleteExercise(service, requestInput),
+                [ALL] = DeleteAll(service, requestInput)
             };
         }
 
@@ -131,10 +132,20 @@ namespace SchoolScheduleApp
 
         private MainCommand Delete => args => Execute(deleteCommandsMap, args);
 
-        private Command CreateDemo = args =>
-        {
+        private Command CreateDemo(
+            ScheduleService service,
+            Func<string, string> requestInput,
+            Action<string> writeln)
+            => args =>
+            {
+                writeln("Перед созданием демо-базы будет очищена существующая.");
+                var answer = requestInput("Выполнить? (да/нет)");
 
-        };
+                if (answer.ToLower() != "да") return;
+
+                DoWithHandleException(() => service.CleanDb(), "Не удалось очистить базу");
+                DoWithHandleException(() => service.CreateDemoBase(), "Не удалось создать демо-базу");
+            };
 
         private Command CreateStudent(
             ScheduleService service,
@@ -442,6 +453,18 @@ namespace SchoolScheduleApp
                 Del(() => service.Delete(new Exercise { Id = id }));
             };
 
+        private Command DeleteAll(
+            ScheduleService service,
+            Func<string, string> requestInput)
+            => args =>
+            {
+                var answer = requestInput("Это действие очистит БД\nПродолжить? (да/нет)");
+
+                if (answer.ToLower() != "да") return;
+
+                DoWithHandleException(() => service.CleanDb(), "Не удалось очистить базу");
+            };
+
         private static void Save(Action action) => DoWithHandleException(action, "Не удалось сохранить объект");
 
         private static void Del(Action action) => DoWithHandleException(action, "Не удалось удалить объект");
@@ -452,7 +475,7 @@ namespace SchoolScheduleApp
             {
                 action();
             }
-            catch
+            catch (Exception e)
             {
                 throw new CommandException(message);
             }

@@ -1,3 +1,7 @@
+CREATE FUNCTION uuid() RETURNS varchar(256) AS '
+	SELECT md5(random()::text || clock_timestamp()::text)::uuid
+' LANGUAGE SQL;
+
 CREATE TABLE lesson (
 	id varchar NOT NULL PRIMARY KEY,
 	name varchar NOT NULL
