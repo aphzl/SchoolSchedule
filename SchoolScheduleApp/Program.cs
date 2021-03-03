@@ -6,8 +6,8 @@ namespace SchoolScheduleApp
     {
         public static void Main()
         {
-            var console = new ScheduleConsole();
-            console.StartConsoleCycle();
+            var console = ScheduleConsole.Create();
+            console.Start();
         }
     }
 }

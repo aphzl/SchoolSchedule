@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SchoolSchedule.Model.Entity;
 using SchoolSchedule.Service;
+using SchoolScheduleApp.Exceptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SchoolScheduleApp
 {
@@ -11,91 +9,42 @@ namespace SchoolScheduleApp
     {
         private bool isWorking;
 
-        private readonly ScheduleService scheduleService;
+        private readonly ConsoleCommander consoleCommander;
 
-        private static readonly string LESSON = "lesson";
-        private static readonly string CLASS = "class";
-
-        private readonly Dictionary<string, Action<List<string>>> saveMap;
-
-        private static readonly Dictionary<string, Action<List<string>>> getMap =
-            new Dictionary<string, Action<List<string>>>()
-            {
-            };
-
-        private static readonly Dictionary<string, Action<List<string>>> removeMap =
-            new Dictionary<string, Action<List<string>>>()
-            {
-            };
-
-        private readonly Dictionary<string, Dictionary<string, Action<List<string>>>> keysMap;
-
-        public ScheduleConsole()
+        private ScheduleConsole(ConsoleCommander consoleCommander)
         {
-            scheduleService = ScheduleService.Create(
-                b => b.UseNpgsql("host=localhost;database=sched4;username=schedule;password=schedule;"));
-
-            saveMap = new Dictionary<string, Action<List<string>>>()
-            {
-                [CLASS] = SaveSchoolClass
-            };
-
-            keysMap = new Dictionary<string, Dictionary<string, Action<List<string>>>>()
-            {
-                ["save"] = saveMap,
-                ["get"] = getMap,
-                ["remove"] = removeMap,
-
-                ["exit"] = new Dictionary<string, Action<List<string>>>() { ["do"] = args => isWorking = false }
-            };
+            this.consoleCommander = consoleCommander;
         }
 
-        public void StartConsoleCycle()
+        public static ScheduleConsole Create()
+        {
+            var service = ScheduleService.Create(
+                b => b.UseNpgsql("host=localhost;database=sched4;username=schedule;password=schedule;"));
+            var commander = new ConsoleCommander(service);
+
+            return new ScheduleConsole(commander);
+        }
+
+        public void Start()
         {
             isWorking = true;
 
             while (isWorking)
             {
-                Console.Write("Введите команду: ");
-                var input = Console.ReadLine();
-                var parts = input.Split(' ')
-                    .Where(p => p.Any())
-                    .ToList();
+                var input = RequestInput("Введите команду");
 
-                if (!parts.Any()) continue;
-
-                var key = parts.First().ToLower();
-
-                if (!keysMap.ContainsKey(key))
+                try
                 {
-                    Console.WriteLine($"Неизвестный ключ '{key}' в команде '{input}'");
-                    continue;
+                    consoleCommander.Execute(input);
                 }
-
-                var actionMap = keysMap[key];
-                var args = parts.Skip(1);
-
-                if (!args.Any())
+                catch (CommandException e)
                 {
-                    actionMap.Values.First()(new List<string>());
-                    continue;
-                }
-                else
-                {
-                    var subKey = args.First();
-
-                    if (!actionMap.ContainsKey(subKey))
-                    {
-                        Console.WriteLine($"Неизвестный второй ключ '{subKey}' в команде '{input}'");
-                        continue;
-                    }
-
-                    actionMap[subKey](args.Skip(1).ToList());
+                    Console.WriteLine($"Ошибка: {e.Message}");
                 }
             }
         }
 
-        private void SaveSchoolClass(List<string> args)
+        /*private void SaveSchoolClass(List<string> args)
         {
             var id = RequestInput("Введите ID");
             var classNumber = RequestInput("Введите номер");
@@ -109,12 +58,12 @@ namespace SchoolScheduleApp
             };
 
             scheduleService.Save(schoolClass);
-        }
+        }*/
 
-        private string RequestInput(string requestText)
+        private static string RequestInput(string requestText)
         {
-            Console.WriteLine(requestText);
-            Console.Write("-->");
+            Console.WriteLine($"{requestText}:");
+            Console.Write("->");
             return Console.ReadLine();
         }
     }
