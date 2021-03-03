@@ -61,24 +61,24 @@ namespace SchoolSchedule.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на CREATE TABLE exercise (
-        ///	id varchar NOT NULL PRIMARY KEY,
-        ///	lesson_id varchar,
-        ///	teacher_id varchar,
-        ///	school_class_id varchar,
-        ///	day_of_week numeric,
-        ///	exercise_number numeric,
-        ///	auditory numeric,
-        ///	CONSTRAINT teacher_id_lesson_id_fkey FOREIGN KEY (teacher_id, lesson_id) REFERENCES teacher_lesson(teacher_id, lesson_id),
-        ///	CONSTRAINT school_class_id_fkey FOREIGN KEY (school_class_id) REFERENCES school_class(id)
-        ///);
-        ///
-        ///CREATE TABLE lesson (
+        ///   Ищет локализованную строку, похожую на CREATE TABLE lesson (
         ///	id varchar NOT NULL PRIMARY KEY,
         ///	name varchar NOT NULL
         ///);
         ///
-        ///C [остаток строки не уместился]&quot;;.
+        ///CREATE TABLE teacher (
+        ///	id varchar NOT NULL PRIMARY KEY,
+        ///	first_name varchar NOT NULL,
+        ///	mid_name varchar NOT NULL,
+        ///	last_name varchar NOT NULL
+        ///);
+        ///
+        ///CREATE TABLE teacher_lesson (
+        ///	teacher_id varchar NOT NULL,
+        ///	lesson_id varchar NOT NULL,
+        ///	PRIMARY KEY (teacher_id, lesson_id),
+        ///	CONSTRAINT teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES teacher(id) ON DELETE CASCADE,
+        ///	CONSTRAINT lesson_id_fkey FOREIGN KEY (les [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string V1_00_01__Main {
             get {

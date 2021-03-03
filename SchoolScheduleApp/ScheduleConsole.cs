@@ -19,8 +19,8 @@ namespace SchoolScheduleApp
         public static ScheduleConsole Create()
         {
             var service = ScheduleService.Create(
-                b => b.UseNpgsql("host=localhost;database=sched4;username=schedule;password=schedule;"));
-            var commander = new ConsoleCommander(service);
+                b => b.UseNpgsql("host=localhost;database=sched5;username=schedule;password=schedule;"));
+            var commander = new ConsoleCommander(service, RequestInput, Console.Write, Console.WriteLine);
 
             return new ScheduleConsole(commander);
         }
