@@ -61,14 +61,16 @@ namespace SchoolSchedule.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на INSERT INTO lesson VALUES (&apos;2d1fb086-9035-474f-969b-e9075226e572&apos;, &apos;Русский язык&apos;);
+        ///   Ищет локализованную строку, похожую на CREATE OR REPLACE FUNCTION uuid() RETURNS varchar(256) AS &apos;
+        ///	SELECT md5(random()::text || clock_timestamp()::text)::uuid
+        ///&apos; LANGUAGE SQL;
+        ///
+        ///
+        ///INSERT INTO lesson VALUES (&apos;2d1fb086-9035-474f-969b-e9075226e572&apos;, &apos;Русский язык&apos;);
         ///INSERT INTO lesson VALUES (&apos;36992aab-0fb2-47b4-b708-fd940e29385a&apos;, &apos;Математика&apos;);
         ///INSERT INTO lesson VALUES (&apos;6069ce14-a0bb-4013-88a9-003aedb0b14c&apos;, &apos;Литература&apos;);
         ///INSERT INTO lesson VALUES (&apos;46502add-4192-4818-a513-a7af766bccee&apos;, &apos;История&apos;);
-        ///INSERT INTO lesson VALUES (&apos;64f88e58-415f-458c-9b68-67dbb46c4acc&apos;, &apos;География&apos;);
-        ///
-        ///
-        ///INSERT INTO teacher VALUES (&apos;0320ca05-c65d-42f8-98da-05c64e49a038&apos;, &apos;Надежда&apos;, &apos;Ивановна&apos;, &apos;Пет [остаток строки не уместился]&quot;;.
+        ///INSERT INTO lesson VALUES (&apos;64f88e58- [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string Demo {
             get {
@@ -77,27 +79,22 @@ namespace SchoolSchedule.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на CREATE FUNCTION uuid() RETURNS varchar(256) AS &apos;
-        ///	SELECT md5(random()::text || clock_timestamp()::text)::uuid
-        ///&apos; LANGUAGE SQL;
-        ///
-        ///CREATE TABLE lesson (
+        ///   Ищет локализованную строку, похожую на CREATE TABLE lesson (
         ///	id varchar NOT NULL PRIMARY KEY,
-        ///	name varchar NOT NULL
+        ///	name varchar(30) NOT NULL
         ///);
+        ///CREATE INDEX lesson_pk_idx ON lesson (id);
         ///
         ///CREATE TABLE teacher (
         ///	id varchar NOT NULL PRIMARY KEY,
-        ///	first_name varchar NOT NULL,
-        ///	mid_name varchar NOT NULL,
-        ///	last_name varchar NOT NULL
+        ///	first_name varchar(30) NOT NULL,
+        ///	mid_name varchar(30) NOT NULL,
+        ///	last_name varchar(30) NOT NULL
         ///);
-        ///
-        ///CREATE TABLE teacher_lesson (
-        ///	teacher_id varchar NOT NULL,
-        ///	lesson_id varchar NOT NULL,
-        ///	PRIMARY KEY (teacher_id, lesson_id),
-        ///	CONSTRA [остаток строки не уместился]&quot;;.
+        ///CREATE INDEX teacher_pk_idx ON teacher (id);
+        ///CREATE INDEX teacher_first_name_idx ON teacher (first_name);
+        ///CREATE INDEX teacher_mid_name_idx ON teacher (mid_name);
+        ///CREATE INDEX teacher_last_name_idx ON teacher  [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string V1_00_01__Main {
             get {

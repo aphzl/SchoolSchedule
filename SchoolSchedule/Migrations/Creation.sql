@@ -1,4 +1,4 @@
-CREATE TABLE lesson (
+﻿CREATE TABLE lesson (
 	id varchar NOT NULL PRIMARY KEY,
 	name varchar(30) NOT NULL
 );
@@ -57,3 +57,7 @@ CREATE INDEX student_first_name_idx ON student (first_name);
 CREATE INDEX student_mid_name_idx ON student (mid_name);
 CREATE INDEX student_last_name_idx ON student (last_name);
 CREATE INDEX school_class_id_idx ON student (school_class_id);
+
+CREATE TABLE migration_schema (name varchar NOT NULL PRIMARY KEY);
+
+INSERT INTO migration_schema VALUES ('V1_00_01__Main');

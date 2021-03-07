@@ -1,4 +1,9 @@
-﻿INSERT INTO lesson VALUES ('2d1fb086-9035-474f-969b-e9075226e572', 'Русский язык');
+﻿CREATE OR REPLACE FUNCTION uuid() RETURNS varchar(256) AS '
+	SELECT md5(random()::text || clock_timestamp()::text)::uuid
+' LANGUAGE SQL;
+
+
+INSERT INTO lesson VALUES ('2d1fb086-9035-474f-969b-e9075226e572', 'Русский язык');
 INSERT INTO lesson VALUES ('36992aab-0fb2-47b4-b708-fd940e29385a', 'Математика');
 INSERT INTO lesson VALUES ('6069ce14-a0bb-4013-88a9-003aedb0b14c', 'Литература');
 INSERT INTO lesson VALUES ('46502add-4192-4818-a513-a7af766bccee', 'История');

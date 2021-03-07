@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Resources;
 using SchoolSchedule.Model.Entity;
@@ -50,7 +51,7 @@ namespace SchoolSchedule.Service
         {
             try
             {
-                return context.Schemas.CountAsync().Result >= 0;
+                return context.Schemas.Count() >= 0;
             }
             catch (Exception)
             {
